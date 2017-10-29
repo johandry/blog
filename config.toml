@@ -1,4 +1,4 @@
-baseURL = "http://blog.johandry.com"
+baseURL = "http://blog.johandry.com/"
 languageCode = "en-us"
 title = "Johandry's Blog"
 author = "Johandry Amador"
@@ -20,7 +20,7 @@ paginate = 10
   googleAnalytics = "UA-51046735-3"
   disqus = "johandry"
   # CSS name for highlight.js
-  highlightjs = "vscode"
+  highlightjs = "vs2015"
   highlightjs_extra_languages = ["yaml", "bash", "dockerfile", "go", "json", "makefile", "shell"]
   dateFormat = "02 Jan 2006, 15:04"
   # Include any custom CSS and/or JS files

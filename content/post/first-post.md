@@ -1,7 +1,6 @@
 ---
 title: "First Post"
 date: 2017-09-19T21:14:31-07:00
-draft: false
 ---
 
 Is it?
