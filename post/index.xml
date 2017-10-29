@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2017. All rights reserved.</copyright>
-    <lastBuildDate>Tue, 19 Sep 2017 21:14:31 -0700</lastBuildDate>
+    <lastBuildDate>Sat, 28 Oct 2017 23:42:14 -0700</lastBuildDate>
     
 	<atom:link href="http://blog.johandry.com/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>A New Blog on Github</title>
+      <link>http://blog.johandry.com/post/a-new-blog-on-github/</link>
+      <pubDate>Sat, 28 Oct 2017 23:42:14 -0700</pubDate>
+      
+      <guid>http://blog.johandry.com/post/a-new-blog-on-github/</guid>
+      <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&amp;rsquo;t have to do it again but may help others to do the same.
+You&amp;rsquo;ll need Hugo and Git. Once you have Hugo, create the blog with:
+brew install hugo hugo new site blog cd blog git init  The next step is to choose a theme, which took me a long time.</description>
+    </item>
     
     <item>
       <title>First Post</title>

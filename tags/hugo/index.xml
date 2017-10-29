@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Johandry&#39;s Blog</title>
-    <link>http://blog.johandry.com/</link>
-    <description>Recent content on Johandry&#39;s Blog</description>
+    <title>Hugo on Johandry&#39;s Blog</title>
+    <link>http://blog.johandry.com/tags/hugo/</link>
+    <description>Recent content in Hugo on Johandry&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2017. All rights reserved.</copyright>
     <lastBuildDate>Sat, 28 Oct 2017 23:42:14 -0700</lastBuildDate>
     
-	<atom:link href="http://blog.johandry.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://blog.johandry.com/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -21,18 +21,6 @@
       <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&amp;rsquo;t have to do it again but may help others to do the same.
 You&amp;rsquo;ll need Hugo and Git. Once you have Hugo, create the blog with:
 brew install hugo hugo new site blog cd blog git init  The next step is to choose a theme, which took me a long time.</description>
-    </item>
-    
-    <item>
-      <title>First Post</title>
-      <link>http://blog.johandry.com/post/first-post/</link>
-      <pubDate>Tue, 19 Sep 2017 21:14:31 -0700</pubDate>
-      
-      <guid>http://blog.johandry.com/post/first-post/</guid>
-      <description>Is it?
-Nah! I think this is my 3rd attempt to start a blog. I started with johandry.blogspot.com then I started a cool project with PerlDancer and created this other blog perlondancer.blogspot.com. Also, there were a couple of failed attempts with WordPress.com.
-I&amp;rsquo;ll continue posting, I have some ideas and projects that I have in my Github. Most of them related to Go and DevOps.
-Stay tuned!</description>
     </item>
     
   </channel>

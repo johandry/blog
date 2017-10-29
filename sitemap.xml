@@ -3,24 +3,42 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>http://blog.johandry.com/post/a-new-blog-on-github/</loc>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://blog.johandry.com/post/first-post/</loc>
     <lastmod>2017-09-19T21:14:31-07:00</lastmod>
   </url>
   
   <url>
+    <loc>http://blog.johandry.com/tags/blogging/</loc>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/hugo/</loc>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.johandry.com/</loc>
-    <lastmod>2017-09-19T21:14:31-07:00</lastmod>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://blog.johandry.com/post/</loc>
-    <lastmod>2017-09-19T21:14:31-07:00</lastmod>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>http://blog.johandry.com/tags/</loc>
+    <lastmod>2017-10-28T23:42:14-07:00</lastmod>
     <priority>0</priority>
   </url>
   
