@@ -13,6 +13,15 @@ To create a new post:
 2. Edit the file `content/post/a-new-blog-on-github.md` to add the post content.
 3. Edit the metadata and make sure to remove the `draft` variable when you are happy with the content
 
+During the edition process (step #2) you may use `hugo server -D` to view the changes to the new post. Once it's done, run `hugo server` to do a final validation before deploy to GitHub.
+
+Once you are happy with the changes, stop `hugo server` and execute:
+
+    git status
+    git add --all
+    git commit -m "Post <title>"
+    git 
+
 ## Initial process
 
 Everything I did to create this blog is documented in my second post: [A New Blog on GitHub](http://blog.johandry.com/post/a-new-blog-on-github/).

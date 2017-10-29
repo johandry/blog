@@ -77,7 +77,7 @@ help:
 # check if the current branch is dirty, meaning, there are pending changes to
 # commit
 dirt:
-	@if [[ $(git status -s) ]]; then \
+	@if [[ $$(git status -s) ]]; then \
 		$(ECHO) "$(C_RED)The working directory is dirty. Please commit any pending changes.$(C_STD)"; exit 1; \
 	fi
 
