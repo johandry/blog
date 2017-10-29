@@ -1,0 +1,104 @@
+baseURL = "http://blog.johandry.com/"
+languageCode = "en-us"
+title = "Johandry's Blog"
+author = "Johandry Amador"
+theme = "blackburn"
+
+# Shown in the side menu
+copyright = "&copy; 2017. All rights reserved."
+canonifyurls = true
+paginate = 10
+
+[indexes]
+  tag = "tags"
+  topic = "topics"
+
+[params]
+  # Shown in the home page
+  subtitle = "Things & Stuffs about DevOps and Go"
+  brand = "Johandry"
+  googleAnalytics = "UA-51046735-3"
+  disqus = "johandry"
+  # CSS name for highlight.js
+  highlightjs = "vscode"
+  highlightjs_extra_languages = ["yaml", "bash", "dockerfile", "go", "json", "makefile", "shell"]
+  dateFormat = "02 Jan 2006, 15:04"
+  # Include any custom CSS and/or JS files
+  # (relative to /static folder)
+  # custom_css = ["css/my.css"]
+  # custom_js = ["js/my.js"]
+
+[menu]
+  # Shown in the side menu.
+  [[menu.main]]
+    name = "Home"
+    pre = "<i class='fa fa-home fa-fw'></i>"
+    weight = 1
+    identifier = "home"
+    url = "/"
+  [[menu.main]]
+    name = "Posts"
+    pre = "<i class='fa fa-list fa-fw'></i>"
+    weight = 2
+    identifier = "post"
+    url = "/post/"
+  [[menu.main]]
+    name = "Web Site"
+    pre = "<i class='fa fa-globe fa-fw'></i>"
+    weight = 3
+    identifier = "website"
+    url = "http://johandry.com/"
+  [[menu.main]]
+    name = "Email"
+    pre = "<i class='fa fa-envelope-o fa-fw'></i>"
+    weight = 4
+    url = "mailto:johandry@yahoo.com"
+
+[social]
+  # Link your social networking accounts to the side menu
+  # by entering your username or ID.
+  aboutme = "johandry"
+
+  # SNS microblogging
+  twitter = "@johandry"
+  # gnusocial = "*" # Specify href (e.g. https://quitter.se/yourusername)
+  facebook = "Johandry.Amador"
+  googleplus = "JohandryAmador"
+  # weibo = "*"
+  # tumblr = "*"
+
+  # SNS photo/video sharing
+  instagram = "johandry_amador"
+  flickr = "14033374@N05"
+  # photo500px = "*"
+  pinterest = "johandryamador"
+  youtube = "johandryamador"
+  # vimeo = "user30429617"
+  # vine = "*"
+  # slideshare = "*"
+
+  # SNS career oriented
+  linkedin = "johandry-amador-3ba8507"
+  # xing = "*"
+
+  # SNS news
+  reddit = "johandryamador"
+  # hackernews = "*"
+
+  # Techie
+  github = "johandry"
+  # gitlab = "*"
+  bitbucket = "johandry"
+  stackoverflow = "3562284"
+  serverfault = "264211"
+
+  # Gaming
+  # steam = "*"
+  # mobygames = "*"
+
+  # Music
+  # lastfm = "*"
+  # discogs = "*"
+
+  # Other
+  keybase = "johandry"
