@@ -84,15 +84,22 @@ dirt:
 # remove the content in public/ folder. It can be regenerated with hugo
 clean-public:
 	@$(ECHO) "$(C_GREEN)Deleting old publication$(C_STD)"
-	@$(RM) -r public; $(MKDIR) public
+	@$(RM) -r public/; mkdir -p public
 	@git worktree prune
 	@$(RM) -r .git/worktrees/public/
 
 # publish the new build to the gh-pages branch
-build: dirt clean-public
+build: clean-public
 	@$(ECHO) "$(C_GREEN)Checking out gh-pages branch into public$(C_STD)"
 	@git worktree add -B gh-pages public origin/gh-pages
 	@$(ECHO) "$(C_GREEN)Regenerating site$(C_STD)"
 	@$(RM) -r public/*; hugo
 	@$(ECHO) "$(C_GREEN)Updating gh-pages branch$(C_STD)"
 	@cd public && git add --all && git commit -m "Publishing to gh-pages"
+
+# push the commited changes in master and gh-pages branches
+push:
+	@$(ECHO) "$(C_GREEN)Pushing master$(C_STD)"
+	@git push origin master
+	@$(ECHO) "$(C_GREEN)Pushing gh-pages$(C_STD)"
+	@cd public; git push origin gh-pages

@@ -1,7 +1,6 @@
 ---
 title: "A New Blog on Github"
 date: 2017-10-28T23:42:14-07:00
-draft: true
 tags: ["Hugo", "Blogging"]
 ---
 

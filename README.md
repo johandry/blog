@@ -20,7 +20,12 @@ Once you are happy with the changes, stop `hugo server` and execute:
     git status
     git add --all
     git commit -m "Post <title>"
-    git 
+
+Regenerate the `public/` directory with the new post and push it to Github with:
+
+    make build push
+
+Now verify the new post on-line.
 
 ## Initial process
 
