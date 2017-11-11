@@ -1,5 +1,5 @@
 ---
-title: "Terraform Package From Go"
+title: "Using Terraform Packages from Go"
 date: 2017-10-31T20:21:07-07:00
 draft: true
 ---
