@@ -6,19 +6,19 @@ draft: true
 
 # Introduction to Microservices in Go
 
-This is just a very simple example about how to build a microservice in Go, it's not perfect as it is made for Go and Microservices learning.
+This is a very simple example about how to build a microservice in Go. It's meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
 
-The purpose of this microservice is a catalog of the movies I own or want to watch. The code of this simple microservice is at https://github.com/johandry/movie and every section is a branch. Clone the repository and change branch for every section.
+The purpose of this microservice is a catalog of movies. The code is at https://github.com/johandry/micro-media-service and every section is a branch, clone the repo and change branch for every section.
 
-    git clone https://github.com/johandry/movie
+    git clone https://github.com/johandry/micro-media-service
 
 ## A simple RESTful API
 
-Let's start with a simple RESTfull API by making a simple web server. To get the code for this section by checking out branch `s01-restful-api`:
+Let's start with a simple RESTfull API by making a simple web server. Get this section code by checking out the branch `s01-restful-api`:
 
     git checkout s01-restful-api
 
-Every output to the terminal in this microservice uses the `log` package instead of the `fmt`'s prints. So let's start this example with
+All the microservice terminal output is done using the `log` package instead of the `fmt`'s prints. So let's start this example with
 
 {{<highlight golang>}}
 package main
@@ -32,9 +32,9 @@ func main() {
 }
 {{</highlight>}}
 
-Now lets create a simple web server to respond with the microservice version when we open the URL `/api/v1/version`
+Now lets create a simple web server to print the microservice version when we hit the URL `/api/v1/version`
 
-{{<highlight golang>}}
+{{<highlight golang "linenos=inline">}}
 package main
 
 import (
@@ -59,23 +59,23 @@ func handleVersion(rw http.ResponseWriter, r *http.Request) {
 }
 {{</highlight>}}*
 
-We call the `HandleFunc` method to create a `Handler` type on the default handler (`DefaultServerMux` from `net/http` package), mapping the path `"/api/v1/version"` to the function `handleVersion`.
+At line #4 we call the `HandleFunc()` method to create a `Handler` type on the default handler `DefaultServerMux` from the `net/http` package, mapping the path `"/api/v1/version"` to the function `handleVersion()` defined at line #20.
 
-Then we start the HTTP server with `ListenAndServe` that takes two parametersm the TCP network address to bind the server and the used to route requests. In this example the bind address is `":8086"` (port `8086` on every available IP) and as the handler is `nil` it will use the default one (`DefaultServerMux`).
+Then at line #17 we start the HTTP server with `ListenAndServe()` that takes two parameters, the TCP network address to bind the server and the handler to route the requests. In this example the bind address is `":8086"` (port `8086` on every available IP) and, as the handler is `nil`, it will use the default one (`DefaultServerMux`).
 
-The return value of `ListenAndServe` is an error and if there is any (the error is not `nil`) it will be printed by `log.Fatal` method and exit with code 1 (it calls `os.Exit(1)`). The `ListenAndServe` method blocks the program until there is an error or someone or something stop it.
+The return value of `ListenAndServe()` is an error and if there is any (the error is not `nil`) it will be printed by `log.Fatal` method and exit with code 1 by calling `os.Exit(1)`. The `ListenAndServe()` method blocks the program until there is an error or someone stop it.
 
-To view your masterpiece in action, start your program with `go run main.go` and open a in a browser or with curl the URL: http://localhost8086/api/v1/version.
+To view your masterpiece in action, start your program with `go run main.go` and open the URL http://localhost8086/api/v1/version in a browser or with curl.
 
 What will happen if you start the program twice?
 
 ## Let's speak in JSON
 
-The version output in our example was plain text, now let's see how can we accept and return JSON. The package `encoding/json` is going to help us to encode and decode JSON to/from Go type structures using the `Marshal`,  `Unmarshal`, `Encoder` and `Decoder` functions.
+The output in this first example is the version number in plain text, now let's see how can we print it in JSON format. The package `encoding/json` is going to help us to encode and decode JSON to/from Go type structures using the `Marshal`,  `Unmarshal`, `Encoder` and `Decoder` functions.
 
-We need to return the version so we'll encapsulate it in a structure, modify the global variable and use the `init` function to initialize it.
+To return the version we are going to encapsulate it in a structure (line #1 to #3), modify the global variable `version` to be of the defined `Version` type (line #5) and use the `init()` function to initialize it (line #8).
 
-{{<highlight golang>}}
+{{<highlight golang "linenos=inline">}}
 type Version struct {
 	version string
 }
@@ -95,9 +95,9 @@ func handleVersion(rw http.ResponseWriter, r *http.Request) {
 }
 {{</highlight>}}*
 
-The version handler function was also modified to marshal the version variable. If there is an error marshaling the structure the program will panic, if not we convert the `verJSON` to string as it is a `[]byte` type and return it to the user.
+The version handler function was also modified to marshal (to encode) the `version` variable to JSON. If there is an error marshaling the structure the program will panic, if not we convert `verJSON` to string because [`Marshal()`](https://golang.org/pkg/encoding/json/#Marshal) returns the JSON as a `[]byte` type but [`Fprintf()`](https://golang.org/pkg/fmt/#Fprintf) is waiting for a string.
 
-If we run this the response will be `{}` and this is because the `version` property inside the struct `Version` is not exported. Changing it to `Version string` we get this output `{"Version":"0.1.0"}` which is kind of the expected result but with the JSON field in lowercase. To make `Marshal` to not use the default name of the JSON field as the property name we have to use struct field attributes. So the `version` struct should like this:
+If we run this the response will be `{}` and this is because the `version` property inside the struct `Version` is not exported. Changing the property to `Version string` will return this output `{"Version":"0.1.0"}` which is kind of the expected result but the JSON field should be in lowercase. The `Marshal()` method by default uses the name of the struct property to name the JSON field, to change this default behavior we have to use struct field attributes. So the final `Version` struct should like this:
 
 {{<highlight golang>}}
 type Version struct {
@@ -105,13 +105,13 @@ type Version struct {
 }
 {{</highlight>}}
 
-In this example it's ok to return the JSON in one line but if we want to make it pretty we use the function `MarshalIndent` like this:
+In this example it's ok to return the JSON in one line but if we want to print it in pretty format we use the function `MarshalIndent()` like this:
 
 {{<highlight golang>}}
 verJSON, err := json.MarshalIndent(version, "", "  ")
 {{</highlight>}}
 
-But we are also going to return a movie object based on its ID or all the stored movies. So, let's have a movie structure and mock it with some values:
+The main function of this microservice is to return movie objects. So, let's have a movie structure and initialize it with some testing values:
 
 {{<highlight golang>}}
 type Movie struct {
@@ -247,3 +247,88 @@ curl -s http://localhost:8086/api/v1/movies -d '{"title":"Kagemusha"}'
 curl -s http://localhost:8086/api/v1/movies -d '{"title":"Frankestein"}'
 curl -s http://localhost:8086/api/v1/movies | jq
 ```
+
+## Build and Ship it
+
+It's not done yet, there are many things missing but to see this beauty running as a microservice we have to containerize it, bake it into a container. This section works with the branch `s03-container`.
+
+    git checkout s03-container
+
+We'll use Docker to create the container and multi-stage builds to create a tiny Docker image. Let's starts with a single-stage `Dockerfile` file to create a Docker image based on Alpine to build our new microservice.
+
+
+{{<highlight dockerfile>}}
+FROM golang:alpine
+
+WORKDIR /app
+ADD . /app
+
+RUN cd /app && go build -o movie
+
+EXPOSE 8086
+
+ENTRYPOINT [ "./movie" ]
+{{</highlight>}}
+
+Now build, run, test and destroy the container
+
+    docker build -t johandry/movie .
+    docker run --rm -p 80:8086 --name movie johandry/movie &
+    curl -s http://localhost/api/v1/movies/1 | jq
+    docker stop movie
+
+As you can see we access the API on port `80` because the container expose the API on port `8086` and we map it to port `80` with the option `-p 80:8086`.
+
+The image size is **276MB** (we can see this with `docker images`) it's considerable smaller compared with the **718MB** of an image based on Debian Jessie (try it replacing `FROM golang:alpine` by `FROM golang:1.8-jessie`) but we can make it smaller because in containers size matters. Let's start with changing to a multi-stage build by replacing the `Dockerfile`
+
+{{<highlight dockerfile>}}
+# Build stage
+FROM golang:alpine AS build
+
+ARG PKG_NAME=github.com/johandry/micro-media-service
+
+ADD . /go/src/${PKG_NAME}
+
+RUN cd /go/src/${PKG_BASE}/${PKG_NAME} && \
+    go build -o /movie
+
+# Run stage and microservice image
+FROM alpine
+
+COPY --from=build /movie .
+
+EXPOSE 8086
+
+ENTRYPOINT [ "./movie" ]
+{{</highlight>}}
+
+If you build, run, test and destroy the container with the same instructions you get the same results but the big difference is the size of the image, it's now **10.6MB**. In this example we are using Alpine but you can get the same size replacing it with Debian Stretch (`FROM golang:stretch`)
+
+Can we make it smaller?
+
+Yes, we can build the image from Scratch instead of Apline but not all the applications can support it. Some Go applications require libraries that are not provided using Scratch but in this yet simple microservice we can do it. Replace the Go build line to `CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /movie` and the `FROM` instruction in the second stage to `FROM scratch`.
+
+{{<highlight dockerfile>}}
+# Build stage
+FROM golang:alpine AS build
+
+ARG PKG_NAME=github.com/johandry/micro-media-service
+
+ADD . /go/src/${PKG_NAME}
+
+RUN cd /go/src/${PKG_BASE}/${PKG_NAME} && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /movie
+
+# Run stage and microservice image
+FROM scratch
+
+COPY --from=build /movie .
+
+EXPOSE 8086
+
+ENTRYPOINT [ "./movie" ]
+{{</highlight>}}
+
+The final size of the image: **6.62MB**!!
+
+In a next post I'll explain how to use gRPC and Kubernetes. 
