@@ -4,8 +4,6 @@ date: 2017-10-31T20:21:07-07:00
 draft: true
 ---
 
-# Using Terraform Packages from Go
-
 [Terraform](http://terraform.io) is a tool made by [HashiCorp](https://www.hashicorp.com) to describe infrastructure as a code. Therefore it's used for building, changing, and versioning infrastructure safely and efficiently.
 
 The use of Terraform is quite simple. After download the binary you need to create a terraform configuration file that describe the infrastructure to build. The first time you have to initialize terraform (`terraform init`) otherwise just go and apply the changes (`terraform apply`). Any further change is as simple as modify the configuration file and apply the changes again. When it's not needed, just destroy it (`terraform destroy`).

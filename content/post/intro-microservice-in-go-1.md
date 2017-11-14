@@ -1,10 +1,7 @@
 ---
 title: "Introduction to Microservices in Go, part 1"
 date: 2017-11-10T14:20:08-08:00
-draft: true
 ---
-
-# Introduction to Microservices in Go, part 1
 
 This is a very simple example about how to build a microservice in Go. It's meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
 
