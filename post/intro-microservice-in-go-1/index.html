@@ -281,7 +281,7 @@
 
 <p>Now lets create a simple web server to print the microservice version when we hit the URL <code>/api/v1/version</code></p>
 
-<p><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 2</span>
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 3</span><span style="color:#f92672">import</span> (
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 4</span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
@@ -302,7 +302,7 @@
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">19</span>
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">20</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleVersion</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">21</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, <span style="color:#e6db74">&#34;Version: %s&#34;</span>, <span style="color:#a6e22e">version</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">22</span>}</code></pre></div>*</p>
+<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">22</span>}</code></pre></div>
 
 <p>At line #4 we call the <code>HandleFunc()</code> method to create a <code>Handler</code> type on the default handler <code>DefaultServerMux</code> from the <code>net/http</code> package, mapping the path <code>&quot;/api/v1/version&quot;</code> to the function <code>handleVersion()</code> defined at line #20.</p>
 
@@ -320,7 +320,7 @@
 
 <p>To return the version we are going to encapsulate it in a structure (line #1 to #3), modify the global variable <code>version</code> to be of the defined <code>Version</code> type (line #5) and use the <code>init()</code> function to initialize it (line #8).</p>
 
-<p><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 2</span>	<span style="color:#a6e22e">version</span> <span style="color:#66d9ef">string</span>
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 3</span>}
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 4</span>
@@ -336,7 +336,7 @@
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">14</span>		panic(<span style="color:#e6db74">&#34;Error marshaling version&#34;</span>)
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">15</span>	}
 <span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">16</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, string(<span style="color:#a6e22e">verJSON</span>))
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">17</span>}</code></pre></div>*</p>
+<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">17</span>}</code></pre></div>
 
 <p>The version handler function was also modified to marshal (to encode) the <code>version</code> variable to JSON. If there is an error marshaling the structure the program will panic, if not we convert <code>verJSON</code> to string because <a href="https://golang.org/pkg/encoding/json/#Marshal"><code>Marshal()</code></a> returns the JSON as a <code>[]byte</code> type but <a href="https://golang.org/pkg/fmt/#Fprintf"><code>Fprintf()</code></a> is waiting for a string.</p>
 
@@ -381,10 +381,10 @@
 
 <p>We are also mapping the path <code>&quot;/api/v1/movies&quot;</code> to the handler function <code>handlerAllMovies</code> to respond all the movies in JSON but in this case we&rsquo;ll use the <code>Encoder</code> object from <code>encoding/json</code> that&rsquo;s more efficient than marshaling and return a string, so the handler function to respond all the movies looks like this:</p>
 
-<p><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovies</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovies</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
 	<span style="color:#a6e22e">encoder</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewEncoder</span>(<span style="color:#a6e22e">rw</span>)
 	<span style="color:#a6e22e">encoder</span>.<span style="color:#a6e22e">Encode</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">movies</span>)
-}</code></pre></div>*</p>
+}</code></pre></div>
 
 <p>When we open the URL <a href="http://localhost:8086/api/v1/movies">http://localhost:8086/api/v1/movies</a> we do not get the JSON pretty but if we can get it pretty if we use <code>curl</code> and <a href="https://stedolan.github.io/jq/download/"><code>jq</code></a></p>
 
@@ -405,7 +405,7 @@
 
 <p>In <code>movies.go</code> we create a RegEx to parse a number after <code>&quot;/movies/&quot;</code>, for this we create a compiled RegEx structure that we&rsquo;ll use later to find all the strings that match the pattern. If this match is a number and it is a valid ID of a movie, then respond with the movie in JSON format.</p>
 
-<p><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">reMovieID</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">regexp</span>.<span style="color:#a6e22e">Regexp</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">reMovieID</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">regexp</span>.<span style="color:#a6e22e">Regexp</span>
 
 <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovieFromID</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
   <span style="color:#a6e22e">values</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">reMovieID</span>.<span style="color:#a6e22e">FindStringSubmatch</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">URL</span>.<span style="color:#a6e22e">Path</span>)
@@ -429,7 +429,7 @@
 <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
 	<span style="color:#a6e22e">reMovieID</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">regexp</span>.<span style="color:#a6e22e">Compile</span>(<span style="color:#e6db74">&#34;/movies/([0-9]+)&#34;</span>)
 	<span style="color:#f92672">...</span>
-}</code></pre></div>*</p>
+}</code></pre></div>
 
 <p>Check it by opening in a browser or using <code>curl</code> the following URLs:</p>
 
@@ -452,7 +452,7 @@
 
 <p>Now modify the function <code>handleMovies</code> to read the request body, if there is no body then respond with all the movies, if there is a body and it contain a JSON with the title field, it will search for the movie and return the it in JSON format if it is found.</p>
 
-<p><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovies</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovies</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">req</span> <span style="color:#a6e22e">movieRequest</span>
 	<span style="color:#a6e22e">encoder</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewEncoder</span>(<span style="color:#a6e22e">w</span>)
 	<span style="color:#a6e22e">decoder</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewDecoder</span>(<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Body</span>)
@@ -468,7 +468,7 @@
 	} <span style="color:#66d9ef">else</span> {
 		<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Error</span>(<span style="color:#a6e22e">w</span>, <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;Not found movie with title &#39;%s&#39;&#34;</span>, <span style="color:#a6e22e">req</span>.<span style="color:#a6e22e">Title</span>), <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusBadRequest</span>)
 	}
-}</code></pre></div>*</p>
+}</code></pre></div>
 
 <p>To check this use <code>curl</code> and pass the JSON request with the parameter <code>-d</code>:</p>
 
