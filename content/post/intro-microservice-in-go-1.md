@@ -374,6 +374,8 @@ go run *.go --verbose &
 curl http://localhost:8086/api/v1/version
 ```
 
+You can modify the `formatter` to change the output format or create your own. ([here is an example](https://github.com/johandry/log/blob/master/text_formatter.go))
+
 I also recommend to use the [**Viper**](https://github.com/spf13/viper) and [**Cobra**](https://github.com/spf13/cobra) packages to implement the configuration of your Go programs. Viper manage the settings from environment variables and configuration files (yaml, json, toml and others). Cobra manage the parameters and flags. Both have the same author and play very well together.
 
 Stay in tune for the next post to cover gRPC and Kubernetes. I'll update this line as soon as I have it.
