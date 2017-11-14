@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docker on Johandry&#39;s Blog</title>
+    <link>http://blog.johandry.com/tags/docker/</link>
+    <description>Recent content in Docker on Johandry&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2017. All rights reserved.</copyright>
+    <lastBuildDate>Fri, 10 Nov 2017 14:20:08 -0800</lastBuildDate>
+    
+	<atom:link href="http://blog.johandry.com/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Introduction to Microservices in Go, part 1</title>
+      <link>http://blog.johandry.com/post/intro-microservice-in-go-1/</link>
+      <pubDate>Fri, 10 Nov 2017 14:20:08 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/post/intro-microservice-in-go-1/</guid>
+      <description>This is a very simple example about how to build a microservice in Go. It&amp;rsquo;s meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
+The purpose of this microservice is a catalog of movies. The code is at https://github.com/johandry/micro-media-service and every section is a branch, clone the repo and change branch for every section.
+git clone https://github.com/johandry/micro-media-service  A simple RESTful API Let&amp;rsquo;s start with a simple RESTfull API by making a simple web server.</description>
+    </item>
+    
+  </channel>
+</rss>

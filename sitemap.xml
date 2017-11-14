@@ -24,6 +24,18 @@
   </url>
   
   <url>
+    <loc>http://blog.johandry.com/tags/docker/</loc>
+    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/golang/</loc>
+    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.johandry.com/tags/hugo/</loc>
     <lastmod>2017-10-28T23:42:14-07:00</lastmod>
     <priority>0</priority>
@@ -36,7 +48,25 @@
   </url>
   
   <url>
+    <loc>http://blog.johandry.com/tags/logging/</loc>
+    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/microservices/</loc>
+    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>http://blog.johandry.com/post/</loc>
+    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/restful/</loc>
     <lastmod>2017-11-10T14:20:08-08:00</lastmod>
     <priority>0</priority>
   </url>
