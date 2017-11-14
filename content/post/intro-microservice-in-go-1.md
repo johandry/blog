@@ -1,10 +1,10 @@
 ---
-title: "Introduction to Microservices in Go"
+title: "Introduction to Microservices in Go, part 1"
 date: 2017-11-10T14:20:08-08:00
 draft: true
 ---
 
-# Introduction to Microservices in Go
+# Introduction to Microservices in Go, part 1
 
 This is a very simple example about how to build a microservice in Go. It's meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
 
@@ -331,4 +331,49 @@ ENTRYPOINT [ "./movie" ]
 
 The final size of the image: **6.62MB**!!
 
-In a next post I'll explain how to use gRPC and Kubernetes. 
+In a next post about gRPC and Kubernetes, we'll use this and other containers interacting.
+
+## One more thing ...
+
+Before go to the next post I'd like to add to this microservice the option to configure it. This is a simple code so there isn't much to configure but let's give it the option to run in verbose mode.
+
+Besides the build-in `log` package, there are many others like [`logrus`](https://github.com/sirupsen/logrus) and [`glog`](https://github.com/golang/glog). I have a preference for `logrus` so instead of implement my own,  I'll use it in this example. If you don't have it, get this package with
+
+    go get github.com/sirupsen/logrus
+
+Modify the `main.go` to define and get the flag `--verbose`, and get the value of the environment variable **`MOVIE_VERBOSE`** in lowercase. If the environment variable is `"true"` or if the flag `--debug` is used, then set the debug log level. This means that when I use the logrus function `Debug()`, `Debugf()` or `Debugln()` it will print the message, otherwise it won't because the default log level is Info.
+
+As logrus is API-compatible with the standard `log` package we can create the alias `log` to `logrus` by replacing the import of log to:
+
+{{<highlight golang>}}
+    log "github.com/sirupsen/logrus"
+{{</highlight>}}
+
+And add to `main.go` the following lines:
+
+{{<highlight golang>}}
+var verboseFlag bool
+
+func init() {
+	flag.BoolVar(&verboseFlag, "verbose", false, "Enable verbose mode")
+	flag.Parse()
+	if verboseEnv := strings.ToLower(os.Getenv("MOVIE_VERBOSE")); verboseEnv == "true" || verboseFlag {
+		log.SetLevel(log.DebugLevel)
+	}
+	formatter := &log.TextFormatter{
+		FullTimestamp: true,
+	}
+	log.SetFormatter(formatter)
+}
+{{</highlight>}}
+
+Modify the `log.Printf()` line in `verbose.go` to `log.Debugf()` and run it with:
+
+```
+go run *.go --verbose &
+curl http://localhost:8086/api/v1/version
+```
+
+I also recommend to use the [**Viper**](https://github.com/spf13/viper) and [**Cobra**](https://github.com/spf13/cobra) packages to implement the configuration of your Go programs. Viper manage the settings from environment variables and configuration files (yaml, json, toml and others). Cobra manage the parameters and flags. Both have the same author and play very well together.
+
+Stay in tune for the next post to cover gRPC and Kubernetes. I'll update this line as soon as I have it.

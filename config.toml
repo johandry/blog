@@ -62,17 +62,17 @@ paginate = 10
   # SNS microblogging
   twitter = "@johandry"
   # gnusocial = "*" # Specify href (e.g. https://quitter.se/yourusername)
-  facebook = "Johandry.Amador"
-  googleplus = "JohandryAmador"
+  # facebook = "Johandry.Amador"
+  # googleplus = "JohandryAmador"
   # weibo = "*"
   # tumblr = "*"
 
   # SNS photo/video sharing
-  instagram = "johandry_amador"
-  flickr = "14033374@N05"
+  # instagram = "johandry_amador"
+  # flickr = "14033374@N05"
   # photo500px = "*"
-  pinterest = "johandryamador"
-  youtube = "johandryamador"
+  # pinterest = "johandryamador"
+  # youtube = "johandryamador"
   # vimeo = "user30429617"
   # vine = "*"
   # slideshare = "*"
@@ -82,15 +82,15 @@ paginate = 10
   # xing = "*"
 
   # SNS news
-  reddit = "johandryamador"
+  # reddit = "johandryamador"
   # hackernews = "*"
 
   # Techie
   github = "johandry"
   # gitlab = "*"
-  bitbucket = "johandry"
+  # bitbucket = "johandry"
   stackoverflow = "3562284"
-  serverfault = "264211"
+  # serverfault = "264211"
 
   # Gaming
   # steam = "*"
@@ -101,4 +101,4 @@ paginate = 10
   # discogs = "*"
 
   # Other
-  keybase = "johandry"
+  # keybase = "johandry"
