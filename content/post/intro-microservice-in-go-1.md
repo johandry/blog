@@ -54,7 +54,7 @@ func main() {
 func handleVersion(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(rw, "Version: %s", version)
 }
-{{</highlight>}}*
+{{</highlight>}}
 
 At line #4 we call the `HandleFunc()` method to create a `Handler` type on the default handler `DefaultServerMux` from the `net/http` package, mapping the path `"/api/v1/version"` to the function `handleVersion()` defined at line #20.
 
@@ -90,7 +90,7 @@ func handleVersion(rw http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintf(rw, string(verJSON))
 }
-{{</highlight>}}*
+{{</highlight>}}
 
 The version handler function was also modified to marshal (to encode) the `version` variable to JSON. If there is an error marshaling the structure the program will panic, if not we convert `verJSON` to string because [`Marshal()`](https://golang.org/pkg/encoding/json/#Marshal) returns the JSON as a `[]byte` type but [`Fprintf()`](https://golang.org/pkg/fmt/#Fprintf) is waiting for a string.
 
@@ -146,7 +146,7 @@ func handleMovies(rw http.ResponseWriter, r *http.Request) {
 	encoder := json.NewEncoder(rw)
 	encoder.Encode(&movies)
 }
-{{</highlight>}}*
+{{</highlight>}}
 
 When we open the URL http://localhost:8086/api/v1/movies we do not get the JSON pretty but if we can get it pretty if we use `curl` and [`jq`](https://stedolan.github.io/jq/download/)
 
@@ -194,7 +194,7 @@ func init() {
 	reMovieID, _ = regexp.Compile("/movies/([0-9]+)")
 	...
 }
-{{</highlight>}}*
+{{</highlight>}}
 
 Check it by opening in a browser or using `curl` the following URLs:
 
@@ -235,7 +235,7 @@ func handleMovies(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Not found movie with title '%s'", req.Title), http.StatusBadRequest)
 	}
 }
-{{</highlight>}}*
+{{</highlight>}}
 
 To check this use `curl` and pass the JSON request with the parameter `-d`:
 
