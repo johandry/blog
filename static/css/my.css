@@ -1,0 +1,7 @@
+#TableOfContents ul { 
+  list-style-type: none; 
+}
+
+#TableOfContents ul ul { 
+  list-style-type: disc; 
+}
