@@ -62,6 +62,8 @@
   <link rel="shortcut icon" href="http://blog.johandry.com/img/favicon.ico" type="image/x-icon" />
 
   
+    <link rel="stylesheet" href="http://blog.johandry.com/css/my.css">
+  
   
 
 </head>
@@ -78,7 +80,7 @@
 <div id="menu">
 
   
-  <a class="pure-menu-heading brand" href="http://blog.johandry.com/">Johandry</a>
+  <a class="pure-menu-heading brand" href="http://blog.johandry.com/">Johandry's</a>
 
 
   <div class="pure-menu">
@@ -93,6 +95,12 @@
       
         <li class="pure-menu-item">
           <a class="pure-menu-link" href="http://blog.johandry.com/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/tags/"><i class='fa fa-tags fa-fw'></i>Tags</a>
       
         </li>
       
@@ -268,6 +276,22 @@
   
 
 </div>
+
+  
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#a-simple-restful-api">A simple RESTful API</a></li>
+<li><a href="#let-s-speak-in-json">Let&rsquo;s speak in JSON</a></li>
+<li><a href="#returning-just-one-movie">Returning just one movie</a></li>
+<li><a href="#let-s-read-json">Let&rsquo;s read JSON</a></li>
+<li><a href="#build-and-ship-it">Build and Ship it</a></li>
+<li><a href="#one-more-thing">One more thing &hellip;</a></li>
+</ul></li>
+</ul>
+</nav>
+  
 
   
 
@@ -525,7 +549,7 @@ docker stop movie
 
 <p>As you can see we access the API on port <code>80</code> because the container expose the API on port <code>8086</code> and we map it to port <code>80</code> with the option <code>-p 80:8086</code>.</p>
 
-<p>The image size is <strong>276MB</strong> (we can see this with <code>docker images</code>) it&rsquo;s considerable smaller compared with the <strong>718MB</strong> of an image based on Debian Jessie (try it replacing <code>FROM golang:alpine</code> by <code>FROM golang:1.8-jessie</code>) but we can make it smaller because in containers size matters. Let&rsquo;s start with changing to a multi-stage build by replacing the <code>Dockerfile</code></p>
+<p>The image size is <strong>276MB</strong> (we can see this with <code>docker images</code>) it&rsquo;s considerable smaller compared with the <strong>718MB</strong> of an image based on Debian Jessie (try it replacing <code>FROM golang:alpine</code> by <code>FROM golang:1.8-jessie</code>) and we should make it smaller because in containers, size matters. Let&rsquo;s start with changing to a multi-stage build by replacing the <code>Dockerfile</code></p>
 
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine AS build</span><span style="color:#960050;background-color:#1e0010">
@@ -571,7 +595,41 @@ docker stop movie
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span><span style="color:#e6db74"> [ &#34;./movie&#34; ]</span></code></pre></div>
 
-<p>The final size of the image: <strong>6.62MB</strong>!!</p>
+<p>The size of the image: <strong>6.62MB</strong></p>
+
+<p>But wait, it can be smaller. We can use the build ldflags <code>&quot;-s -w&quot;</code> to omit the symbol table and debug information to reduce the size of the binary. If we add to the build line the parameter <code>-ldflags=&quot;-s -w&quot;</code> we can have an image of <strong>4.54MB</strong>.</p>
+
+<p>Do you want to see something crazy? We can make it even more smaller but this change comes with a performance cost. According to this <a href="https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/">article</a> we can use <a href="https://upx.github.io"><code>upx</code></a> to create a self-extracting compressed file but there is an overhead when the process starts. If you realy need a small container and it&rsquo;s rarely executed then this may be a good option for you.</p>
+
+<p>Let&rsquo;s see the new Docker file using the ldflags and <code>upx</code>:</p>
+
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine AS build</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>ARG PKG_NAME<span style="color:#f92672">=</span>github.com/johandry/micro-media-service<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ADD</span><span style="color:#e6db74"> . /go/src/${PKG_NAME}</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ADD</span><span style="color:#e6db74"> https://github.com/lalyos/docker-upx/releases/download/v3.91/upx /bin/upx</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /go/src/<span style="color:#e6db74">${</span>PKG_BASE<span style="color:#e6db74">}</span>/<span style="color:#e6db74">${</span>PKG_NAME<span style="color:#e6db74">}</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    CGO_ENABLED<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> GOOS<span style="color:#f92672">=</span>linux go build -ldflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-s -w&#34;</span> -a -installsuffix cgo -o /movie.bin <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    chmod +x /bin/upx <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    upx -f --brute -o /movie /movie.bin<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run stage and microservice image</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> scratch</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>COPY --from<span style="color:#f92672">=</span>build /movie .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8086</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span><span style="color:#e6db74"> [ &#34;./movie&#34; ]</span></code></pre></div>
+
+<p>Will take some time to build the image, around 2 minutes in this example, but the final result is amazing.</p>
+
+<p>The final size of the image: <strong>1.26MB</strong>!</p>
+
+<p>We went from a 718MB single-stage image based on Debian Jessie to a 1.26MB multi-stage image based on Scratch, using the ldflags <code>&quot;-s -w&quot;</code> and UPX compression.</p>
 
 <p>In a next post about gRPC and Kubernetes, we&rsquo;ll use this and other containers interacting.</p>
 
@@ -612,7 +670,40 @@ docker stop movie
 curl http://localhost:8086/api/v1/version
 </code></pre>
 
-<p>You can modify the <code>formatter</code> to change the output format or create your own. (<a href="https://github.com/johandry/log/blob/master/text_formatter.go">here is an example</a>)</p>
+<p>Regarding the Docker image, some changes are required as we need an external package and to get it we also need Git installed. The new Docker file is like this:</p>
+
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine AS build</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>ARG PKG_NAME<span style="color:#f92672">=</span>github.com/johandry/micro-media-service<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span><span style="color:#e6db74"> UPX_VER 3.94</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ADD</span><span style="color:#e6db74"> . /go/src/${PKG_NAME}</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ADD</span><span style="color:#e6db74"> https://github.com/upx/upx/releases/download/v3.94/upx-${UPX_VER}-amd64_linux.tar.xz /</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Install upx and git to use `go get`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> apk --update add git openssh <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    rm -rf /var/lib/apt/lists/* <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    rm /var/cache/apk/* <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    tar xf /upx-<span style="color:#e6db74">${</span>UPX_VER<span style="color:#e6db74">}</span>-amd64_linux.tar.xz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    mv /upx-<span style="color:#e6db74">${</span>UPX_VER<span style="color:#e6db74">}</span>-amd64_linux/upx /bin/upx<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> cd /go/src/<span style="color:#e6db74">${</span>PKG_BASE<span style="color:#e6db74">}</span>/<span style="color:#e6db74">${</span>PKG_NAME<span style="color:#e6db74">}</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    go get github.com/sirupsen/logrus <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    CGO_ENABLED<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> GOOS<span style="color:#f92672">=</span>linux go build -ldflags<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;-s -w&#34;</span> -a -installsuffix cgo -o /movie.bin <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    upx -k --best --ultra-brute -o /movie /movie.bin<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Run stage and microservice image</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> scratch</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>COPY --from<span style="color:#f92672">=</span>build /movie .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8086</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span><span style="color:#e6db74"> [ &#34;./movie&#34; ]</span></code></pre></div>
+
+<p>You can modify the <code>formatter</code> to change the output format or create your own. (<a href="https://github.com/johandry/log/blob/master/text_formatter.go">here</a> is an example)</p>
 
 <p>I also recommend to use the <a href="https://github.com/spf13/viper"><strong>Viper</strong></a> and <a href="https://github.com/spf13/cobra"><strong>Cobra</strong></a> packages to implement the configuration of your Go programs. Viper manage the settings from environment variables and configuration files (yaml, json, toml and others). Cobra manage the parameters and flags. Both have the same author and play very well together.</p>
 
