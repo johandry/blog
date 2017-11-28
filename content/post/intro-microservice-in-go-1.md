@@ -2,6 +2,7 @@
 title: "Introduction to Microservices in Go, part 1"
 date: 2017-11-10T14:20:08-08:00
 tags: ["Golang", "Microservices", "RESTful", "Docker", "Logging"]
+toc: true
 ---
 
 This is a very simple example about how to build a microservice in Go. It's meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
@@ -277,7 +278,7 @@ Now build, run, test and destroy the container
 
 As you can see we access the API on port `80` because the container expose the API on port `8086` and we map it to port `80` with the option `-p 80:8086`.
 
-The image size is **276MB** (we can see this with `docker images`) it's considerable smaller compared with the **718MB** of an image based on Debian Jessie (try it replacing `FROM golang:alpine` by `FROM golang:1.8-jessie`) but we can make it smaller because in containers size matters. Let's start with changing to a multi-stage build by replacing the `Dockerfile`
+The image size is **276MB** (we can see this with `docker images`) it's considerable smaller compared with the **718MB** of an image based on Debian Jessie (try it replacing `FROM golang:alpine` by `FROM golang:1.8-jessie`) and we should make it smaller because in containers, size matters. Let's start with changing to a multi-stage build by replacing the `Dockerfile`
 
 {{<highlight dockerfile>}}
 # Build stage
@@ -327,7 +328,43 @@ EXPOSE 8086
 ENTRYPOINT [ "./movie" ]
 {{</highlight>}}
 
-The final size of the image: **6.62MB**!!
+The size of the image: **6.62MB**
+
+But wait, it can be smaller. We can use the build ldflags `"-s -w"` to omit the symbol table and debug information to reduce the size of the binary. If we add to the build line the parameter `-ldflags="-s -w"` we can have an image of **4.54MB**.
+
+Do you want to see something crazy? We can make it even more smaller but this change comes with a performance cost. According to this [article](https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/) we can use [`upx`](https://upx.github.io) to create a self-extracting compressed file but there is an overhead when the process starts. If you realy need a small container and it's rarely executed then this may be a good option for you.
+
+Let's see the new Docker file using the ldflags and `upx`:
+
+{{<highlight dockerfile>}}
+# Build stage
+FROM golang:alpine AS build
+
+ARG PKG_NAME=github.com/johandry/micro-media-service
+
+ADD . /go/src/${PKG_NAME}
+ADD https://github.com/lalyos/docker-upx/releases/download/v3.91/upx /bin/upx
+
+RUN cd /go/src/${PKG_BASE}/${PKG_NAME} && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -a -installsuffix cgo -o /movie.bin && \
+    chmod +x /bin/upx && \
+    upx -f --brute -o /movie /movie.bin
+
+# Run stage and microservice image
+FROM scratch
+
+COPY --from=build /movie .
+
+EXPOSE 8086
+
+ENTRYPOINT [ "./movie" ]
+{{</highlight>}}
+
+Will take some time to build the image, around 2 minutes in this example, but the final result is amazing. 
+
+The final size of the image: **1.26MB**!
+
+We went from a 718MB single-stage image based on Debian Jessie to a 1.26MB multi-stage image based on Scratch, using the ldflags `"-s -w"` and UPX compression.
 
 In a next post about gRPC and Kubernetes, we'll use this and other containers interacting.
 
@@ -372,7 +409,42 @@ go run *.go --verbose &
 curl http://localhost:8086/api/v1/version
 ```
 
-You can modify the `formatter` to change the output format or create your own. ([here is an example](https://github.com/johandry/log/blob/master/text_formatter.go))
+Regarding the Docker image, some changes are required as we need an external package and to get it we also need Git installed. The new Docker file is like this:
+
+{{<highlight dockerfile>}}
+# Build stage
+FROM golang:alpine AS build
+
+ARG PKG_NAME=github.com/johandry/micro-media-service
+
+ENV UPX_VER 3.94
+
+ADD . /go/src/${PKG_NAME}
+ADD https://github.com/upx/upx/releases/download/v3.94/upx-${UPX_VER}-amd64_linux.tar.xz /
+
+# Install upx and git to use `go get`
+RUN apk --update add git openssh && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm /var/cache/apk/* && \
+    tar xf /upx-${UPX_VER}-amd64_linux.tar.xz && \
+    mv /upx-${UPX_VER}-amd64_linux/upx /bin/upx
+
+RUN cd /go/src/${PKG_BASE}/${PKG_NAME} && \
+    go get github.com/sirupsen/logrus && \
+    CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -a -installsuffix cgo -o /movie.bin && \
+    upx -k --best --ultra-brute -o /movie /movie.bin
+
+# Run stage and microservice image
+FROM scratch
+
+COPY --from=build /movie .
+
+EXPOSE 8086
+
+ENTRYPOINT [ "./movie" ]
+{{</highlight>}}
+
+You can modify the `formatter` to change the output format or create your own. ([here](https://github.com/johandry/log/blob/master/text_formatter.go) is an example)
 
 I also recommend to use the [**Viper**](https://github.com/spf13/viper) and [**Cobra**](https://github.com/spf13/cobra) packages to implement the configuration of your Go programs. Viper manage the settings from environment variables and configuration files (yaml, json, toml and others). Cobra manage the parameters and flags. Both have the same author and play very well together.
 
