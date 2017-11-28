@@ -1,6 +1,8 @@
 ---
 title: "Using Terraform Packages from Go"
 date: 2017-10-31T20:21:07-07:00
+tags: ["Golang", "Terraform"]
+toc: true
 draft: true
 ---
 
@@ -188,7 +190,7 @@ When `Apply()` finish, the final state will be stored at the `state` variable. I
 * `func (terraform) WriteState(state, buffer) error`: Save the state into a buffer that can be saved to a file later.
 * `func (terraform) ReadState(buffer) (state, error)`: The buffer has the state in a text form (i.e. read from a file) and ReadState store that buffer into the state variable to be used by terraform later.
 
-### Providers and Provisioners
+## Providers and Provisioners
 
 Some default providers that you can load by default are:
 
@@ -216,7 +218,3 @@ func (p *Platformer) AddProvider(name string, provider terraform.ResourceProvide
 A possible default list of provisioners are: `local-exec`, `remote-exec` and `file`, all of them are located in the Terraform library (`github.com/hashicorp/terraform/builtin/provisioners`).
 
 If it's required to add more provisioners, do a function named `AddProvisioner()` very similar to `AddProvider()`
-
-## Sources
-
-All this research was done initially form this [Gist](https://gist.github.com/gosuri/a1233ad6197e45d670b3), then a lot was obtained from the [Terraform documentation](https://godoc.org/github.com/hashicorp/terraform) and its [source code](https://github.com/hashicorp/terraform).
