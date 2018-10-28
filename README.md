@@ -11,7 +11,8 @@ The main requirement for this blog is [Hugo](https://gohugo.io/), install it exe
 To create a new post:
 1. Execute `hugo new post/<title-file>.md`
 2. Edit the file `content/post/a-new-blog-on-github.md` to add the post content.
-3. Edit the metadata and make sure to remove the `draft` variable when you are happy with the content
+3. Edit the metadata to add the tags like this: `tags: ["Hugo", "Blogging"]`
+4. Remove the `draft` variable in the metadata section when you are happy with the content
 
 During the edition process (step #2) you may use `hugo server -D` to view the changes to the new post. Once it's done, run `hugo server` to do a final validation before deploy to GitHub.
 

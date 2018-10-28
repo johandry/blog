@@ -16,7 +16,7 @@ paginate = 10
 [params]
   # Shown in the home page
   subtitle = "Things & Stuffs about DevOps and Go"
-  brand = "Johandry"
+  brand = "Johandry's"
   googleAnalytics = "UA-51046735-3"
   disqus = "johandry"
   # CSS name for highlight.js
@@ -25,7 +25,7 @@ paginate = 10
   dateFormat = "02 Jan 2006, 15:04"
   # Include any custom CSS and/or JS files
   # (relative to /static folder)
-  # custom_css = ["css/my.css"]
+  custom_css = ["css/my.css"]
   # custom_js = ["js/my.js"]
 
 [menu]
@@ -42,6 +42,12 @@ paginate = 10
     weight = 2
     identifier = "post"
     url = "/post/"
+  [[menu.main]]
+    name = "Tags"
+    pre = "<i class='fa fa-tags fa-fw'></i>"
+    weight = 2
+    identifier = "tag"
+    url = "/tags/"
   [[menu.main]]
     name = "Web Site"
     pre = "<i class='fa fa-globe fa-fw'></i>"
@@ -62,17 +68,17 @@ paginate = 10
   # SNS microblogging
   twitter = "@johandry"
   # gnusocial = "*" # Specify href (e.g. https://quitter.se/yourusername)
-  facebook = "Johandry.Amador"
-  googleplus = "JohandryAmador"
+  # facebook = "Johandry.Amador"
+  # googleplus = "JohandryAmador"
   # weibo = "*"
   # tumblr = "*"
 
   # SNS photo/video sharing
-  instagram = "johandry_amador"
-  flickr = "14033374@N05"
+  # instagram = "johandry_amador"
+  # flickr = "14033374@N05"
   # photo500px = "*"
-  pinterest = "johandryamador"
-  youtube = "johandryamador"
+  # pinterest = "johandryamador"
+  # youtube = "johandryamador"
   # vimeo = "user30429617"
   # vine = "*"
   # slideshare = "*"
@@ -82,15 +88,15 @@ paginate = 10
   # xing = "*"
 
   # SNS news
-  reddit = "johandryamador"
+  # reddit = "johandryamador"
   # hackernews = "*"
 
   # Techie
   github = "johandry"
   # gitlab = "*"
-  bitbucket = "johandry"
+  # bitbucket = "johandry"
   stackoverflow = "3562284"
-  serverfault = "264211"
+  # serverfault = "264211"
 
   # Gaming
   # steam = "*"
@@ -101,4 +107,4 @@ paginate = 10
   # discogs = "*"
 
   # Other
-  keybase = "johandry"
+  # keybase = "johandry"
