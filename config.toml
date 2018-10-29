@@ -15,7 +15,7 @@ paginate = 10
 
 [params]
   # Shown in the home page
-  subtitle = "Things & Stuffs about DevOps and Go"
+  subtitle = "Things & Stuffs about DevOps & Go"
   brand = "Johandry's"
   googleAnalytics = "UA-51046735-3"
   disqus = "johandry"
