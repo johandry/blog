@@ -6,11 +6,11 @@
 #
 # Basic rules:
 # 		<none>		If no rule is specified will do the 'default' rule which is 'build'
-#			build     Build a container to build and ship the application.
+#		build     	Build a container to build and ship the application.
 # 		clean 		Remove all the created images.
-#     help			Display all the existing rules and description of what they do
-#     version   Shows the application version.
-# 		all 			Will build the application in every way and run it
+#       help		Display all the existing rules and description of what they do
+#       version   	Shows the application version.
+# 		all 		Will build the application in every way and run it
 #
 # Description: This Makefile is to help me to execute all the possible or most
 # common actions to my blog.
@@ -24,14 +24,14 @@
 ## -----------------------------------------------------------------------------
 
 # SHELL need to be defined at the top of the Makefile. Do not change its value.
-SHELL  				:= /bin/bash
+SHELL  			   := /bin/bash
 
 # Output:
-NO_COLOR 		 ?= false
+NO_COLOR 		   ?= false
 ifeq ($(NO_COLOR),false)
-ECHO 				 := echo -e
+ECHO 			   := echo -e
 C_STD 				= $(shell $(ECHO) -e "\033[0m")
-C_RED		 			= $(shell $(ECHO) -e "\033[91m")
+C_RED		 		= $(shell $(ECHO) -e "\033[91m")
 C_GREEN 			= $(shell $(ECHO) -e "\033[92m")
 C_YELLOW 			= $(shell $(ECHO) -e "\033[93m")
 C_BLUE	 			= $(shell $(ECHO) -e "\033[94m")
@@ -39,9 +39,9 @@ I_CROSS 			= $(shell $(ECHO) -e "\xe2\x95\xb3")
 I_CHECK 			= $(shell $(ECHO) -e "\xe2\x9c\x94")
 I_BULLET 			= $(shell $(ECHO) -e "\xe2\x80\xa2")
 else
-ECHO 				 := echo
+ECHO 			   := echo
 C_STD 				=
-C_RED		 			=
+C_RED		 		=
 C_GREEN 			=
 C_YELLOW 			=
 C_BLUE	 			=
@@ -64,7 +64,7 @@ default: build
 
 # all is to execute the entire process to create a Presto AMI and a Presto
 # Cluster.
-all: clean build build-all image run
+all: build push
 
 # help to print all the commands and what they are for
 help:
@@ -76,20 +76,21 @@ help:
 
 # check if the current branch is dirty, meaning, there are pending changes to
 # commit
-dirt:
+check:
 	@if [[ $$(git status -s) ]]; then \
 		$(ECHO) "$(C_RED)The working directory is dirty. Please commit any pending changes.$(C_STD)"; exit 1; \
 	fi
 
 # remove the content in public/ folder. It can be regenerated with hugo
-clean-public:
+clean:
 	@$(ECHO) "$(C_GREEN)Deleting old publication$(C_STD)"
 	@$(RM) -r public/; mkdir -p public
 	@git worktree prune
 	@$(RM) -r .git/worktrees/public/
 
 # publish the new build to the gh-pages branch
-build: clean-public
+build: clean
+	@git checkout master; git pull
 	@$(ECHO) "$(C_GREEN)Checking out gh-pages branch into public$(C_STD)"
 	@git worktree add -B gh-pages public origin/gh-pages
 	@$(ECHO) "$(C_GREEN)Regenerating site$(C_STD)"
@@ -103,3 +104,14 @@ push:
 	@git push origin master
 	@$(ECHO) "$(C_GREEN)Pushing gh-pages$(C_STD)"
 	@cd public; git push origin gh-pages
+
+TITLE 		       ?= $(T)
+
+# creates a new post
+post:
+	@if [[ -z "$(TITLE)" ]]; then $(ECHO) "$(C_RED)[ ERROR ]$(C_STD) Require a post title, use $(C_YELLOW)make post T=<title_post>$(C_STD)"; exit 1; fi
+	@$(ECHO) "$(C_GREEN)Creating the post: $(C_YELLOW)$(TITLE)$(C_STD)"
+	@branch=$$(echo $(TITLE) | tr ' ' '_' | tr 'A-Z' 'a-z'); git checkout -b post/$${branch}
+	@file=$$(echo $(TITLE) | tr ' ' '-' | tr 'A-Z' 'a-z'); hugo new post/$${file}.md; \
+	$(ECHO) "$(C_GREEN)Edit the file $(C_BLUE)content/post/$${file}.md$(C_GREEN)\nModify the $(C_BLUE)tags$(C_GREEN) and remove the $(C_BLUE)draft$(C_GREEN) variable when ready to publish$(C_STD)"
+
