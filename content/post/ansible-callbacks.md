@@ -26,6 +26,38 @@ stdout_callback   = grpc
 callback_plugins  = .
 ```
 
+Instead of installing Ansible let's use a Docker container from `williamyeh/ansible:ubuntu16.04` or `ansible/ansible:ubuntu1604`:
+
+```bash
+docker run -it --rm --name ansible williamyeh/ansible:ubuntu16.04 ansible --version                                            
+# ansible 2.5.0
+#  config file = None
+#  ...
+#  python version = 2.7.13 (default, Nov 24 2017, 17:33:09) [GCC 6.3.0 20170516]
+docker run -it --rm --name ansible williamyeh/ansible:ubuntu16.04 bash
+```
+
+And for testing, lets use a few sample roles that are simple but execute enough tasks to get some output. Check the content of the `test/` directory in [johandry/ansible-api-callback-plugin](johandry/ansible-api-callback-plugin), there is a `roles` directory with 3 roles: `go/install`, `go/build` and `service`, these roles are executed by the `playbook.yaml` file to install Go, build a simple Web service and execute it. 
+
+The content or creation of the roles is not important here, mainly because we are doing some tasks with Ansible that shouldn't be done. It's not right to use Ansible to install Go in a Docker container, neither to build a Go program. I recommended to use multi-stages containers to build and ship the service. But if you are interested to know how to create roles, use and read about `ansible-galaxy` tool.
+
+There is also a `docker-compose.yaml` file to make it easy the execution of the container. 
+
+```bash
+docker-compose run ansible
+```
+
+Or, to login into the container and execute the playbook manually:
+
+```bash
+docker-compose run --entrypoint /bin/bash ansible
+# ansible-playbool -i inventory playbook.yaml
+```
+
+Now lets create the callback plugin
+
+### Creating the Callback Plugin
+
 
 
 ## Sources
@@ -35,3 +67,8 @@ callback_plugins  = .
 - [ansible.cfg](https://docs.ansible.com/ansible/2.7/reference_appendices/config.html#default-callback-plugin-path)
 
 - [Developing plugins](https://docs.ansible.com/ansible/2.5/dev_guide/developing_plugins.html#callback-plugins)
+- [Docker compose file reference](https://docs.docker.com/compose/compose-file/)
+- [Creating Ansible roles](https://www.azavea.com/blog/2014/10/09/creating-ansible-roles-from-scratch-part-1/)
+- [Ansible-Go](https://github.com/jlund/ansible-go)
+- [Microservices in Go](http://blog.johandry.com/post/intro-microservice-in-go-1/)
+
