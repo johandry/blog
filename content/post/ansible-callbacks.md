@@ -37,7 +37,7 @@ docker run -it --rm --name ansible williamyeh/ansible:ubuntu16.04 ansible --vers
 docker run -it --rm --name ansible williamyeh/ansible:ubuntu16.04 bash
 ```
 
-And for testing, lets use a few sample roles that are simple but execute enough tasks to get some output. Check the content of the `test/` directory in [johandry/ansible-api-callback-plugin](johandry/ansible-api-callback-plugin), there is a `roles` directory with 3 roles: `go/install`, `go/build` and `service`, these roles are executed by the `playbook.yaml` file to install Go, build a simple Web service and execute it. 
+And for testing, lets use a few sample roles that are simple but execute enough tasks to get some output. Check the content of the `test/` directory in the GitHub [johandry/ansible-api-callback-plugin](johandry/ansible-api-callback-plugin) repository, there is a `roles` directory with 3 roles: `go/install`, `go/build` and `service`, these roles are executed by the `playbook.yaml` file to install Go, build a simple Web service and execute it. 
 
 The content or creation of the roles is not important here, mainly because we are doing some tasks with Ansible that shouldn't be done. It's not right to use Ansible to install Go in a Docker container, neither to build a Go program. I recommended to use multi-stages containers to build and ship the service. But if you are interested to know how to create roles, use and read about `ansible-galaxy` tool.
 
@@ -54,11 +54,15 @@ docker-compose run --entrypoint /bin/bash ansible
 # ansible-playbool -i inventory playbook.yaml
 ```
 
-Now lets create the callback plugin
+Now, lets get started and create the callback plugin
 
 ### Creating the Callback Plugin
 
+What I do is try or read the code of different callback plugins and choose the one that handle most of the events that I want to handle. They are located in the Ansible GitHub repository [here](https://github.com/ansible/ansible/tree/devel/lib/ansible/plugins/callback), also check the [developer guide to build callback plugins](https://docs.ansible.com/ansible/2.7/dev_guide/developing_plugins.html#callback-plugins).
 
+Let's copy the [dense](https://github.com/ansible/ansible/blob/devel/lib/ansible/plugins/callback/dense.py) callback plugin dropping it into the `callback_plugins` directory adjacent to playbook.
+
+  
 
 ## Sources
 
