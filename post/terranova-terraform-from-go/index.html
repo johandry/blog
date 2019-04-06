@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.49.2" />
+
+  <title>Terranova: Using Terraform from Go &middot; Johandry&#39;s Blog</title>
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="http://blog.johandry.com/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="http://blog.johandry.com/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="http://blog.johandry.com/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/vs2015.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/json.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/makefile.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/shell.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="http://blog.johandry.com/img/favicon.ico" type="image/x-icon" />
+
+  
+    
+        <link rel="stylesheet" href="http://blog.johandry.com/css/my.css">
+    
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="http://blog.johandry.com/">Johandry's</a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/tags/"><i class='fa fa-tags fa-fw'></i>Tags</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://johandry.com/"><i class='fa fa-globe fa-fw'></i>Web Site</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="mailto:johandry@yahoo.com"><i class='fa fa-envelope-o fa-fw'></i>Email</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/@johandry" target="_blank"><i class="fa fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://linkedin.com/in/johandry-amador-3ba8507" target="_blank"><i class="fa fa-linkedin-square fa-fw"></i>LinkedIn</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/johandry" target="_blank"><i class="fa fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://stackoverflow.com/users/3562284" target="_blank"><i class="fa fa-stack-overflow fa-fw"></i>Stack Overflow</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2017. All rights reserved.</small>
+  </div>
+  <div class="small-print">
+    <small>Built with&nbsp;<a href="https://gohugo.io/" target="_blank">Hugo</a></small>
+    <small>Theme&nbsp;<a href="https://github.com/yoshiharuyamashita/blackburn" target="_blank">Blackburn</a></small>
+  </div>
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>Terranova: Using Terraform from Go</h1>
+  <h2></h2>
+</div>
+<div class="content">
+
+  <div class="post-meta">
+
+  <div>
+    <i class="fa fa-calendar fa-fw"></i>
+    <time>31 Oct 2017, 20:21</time>
+  </div>
+
+  
+
+  
+
+  
+  
+  
+  <div>
+    <i class="fa fa-tags fa-fw"></i>
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/golang">Golang</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/terraform">Terraform</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/terranova">Terranova</a>
+    
+  </div>
+  
+  
+
+</div>
+
+  
+
+<p><a href="http://terraform.io">Terraform</a> is an amazing tool made by <a href="https://www.hashicorp.com">HashiCorp</a> to describe infrastructure as a code. Terraform allow us to build, change, and do versioning of the infrastructure safely and efficiently. The use of Terraform is quite simple, after download the binary you need to create a terraform configuration file or files to describe the infrastructure to build. The first time you have to initialize terraform (<code>terraform init</code>) to download all the dependencies and then apply the changes (<code>terraform apply</code>). Any further change is as simple as modify the configuration file and apply the changes again. When the infrastructure is not needed, you just destroy it (<code>terraform destroy</code>).</p>
+
+<p>Many developers automate terraform tasks calling the binary from a script or a program and that’s totally fine. However if you are coding in Go and knowing that Terraform is made in Go (free and available on <a href="https://github.com/hashicorp/terraform">GitHub</a>), why not use the Terraform packages instead of the binary?</p>
+
+<p>One reason - and, to me, maybe the most important - to use the Terraform package instead of the binary is to provide to the users one single executable file to build and change the infrastructure. In a regular scenario the user have to download the Terraform binary, the configuration files (usually more than one) and the instructions or a script automating the process. Too many files, steps and dependencies, right?</p>
+
+<p>The use of the Terraform package is simple once you are familiar with it. In order to make it simpler and easier to you, I will explain how to use the Go package <strong><a href="https://github.com/johandry/terranova">Terranova</a></strong>.</p>
+
+<h2 id="how-to-use-the-terranova-library">How to use the Terranova library</h2>
+
+<p>There are several objects needed by Terranova and therefore by Terraform to work:</p>
+
+<ul>
+<li><strong>Code</strong>: It&rsquo;s basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.</li>
+<li><strong>Providers</strong>: A Provider is the interface between terraform and the underlying platform which is usually an IaaS (i.e. AWS, GCP, MS Azure, VMWare), PaaS (i.e. Heroku) or SaaS (i.e. DNSimple). The entire list is here: <a href="https://www.terraform.io/docs/providers/">https://www.terraform.io/docs/providers/</a></li>
+<li><strong>Provisioners</strong>: The Provisioners are used to execute scripts on a local or remote machine, transfer files to remote machines and handling of configuration managers (i.e. Check, Salt). To know more or get the entire list, check this out: <a href="https://www.terraform.io/docs/provisioners/">https://www.terraform.io/docs/provisioners/</a></li>
+<li><strong>Variables</strong>: The Code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.</li>
+<li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It&rsquo;s important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
+</ul>
+
+<p>The first step is to get and import the Terranova package:</p>
+
+<pre><code class="language-bash">go get -u github.com/johandry/terranova
+</code></pre>
+
+<pre><code class="language-go">import (
+  &quot;github.com/johandry/terranova&quot;
+)
+</code></pre>
+
+<p>Then lets work on each of the needed objects.</p>
+
+<h3 id="code">Code</h3>
+
+<p>To create the Terraform Code we need a string variable to store it either as a plain text or a template but to keep to simple lets use plain text.</p>
+
+<pre><code class="language-go">var code string
+
+func init() {
+  code = `
+  variable &quot;count&quot;    { default = 2 }
+  variable &quot;key_name&quot; {}
+  provider &quot;aws&quot; {
+    region        = &quot;us-west-2&quot;
+  }
+  resource &quot;aws_instance&quot; &quot;server&quot; {
+    instance_type = &quot;t2.micro&quot;
+    ami           = &quot;ami-6e1a0117&quot;
+    count         = &quot;${var.count}&quot;
+    key_name      = &quot;${var.key_name}&quot;
+  }
+  provisioner &quot;file&quot; {
+    content     = &quot;ami used: ${self.ami}&quot;
+    destination = &quot;/tmp/file.log&quot;
+  }
+`
+}
+</code></pre>
+
+<p>In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region <code>us-west-2</code>.</p>
+
+<p>Now we are ready to create an instance of the <a href="https://github.com/johandry/terranova/blob/master/platform.go"><code>Platform</code> struct</a> using <code>NewPlatform()</code> passing the code as a parameter.</p>
+
+<pre><code class="language-go">func main() {
+  platform, err := terranova.NewPlatform(code)
+  if err != nil {
+    log.Fatalf(&quot;Fail to initialize the platform. %s&quot;, err)
+  }
+}
+</code></pre>
+
+<h3 id="providers">Providers</h3>
+
+<p>The Terraform code used in this example uses the AWS Provider, so we have to make this provider available to the platform first getting and importing the package, then using the <code>AddProvider()</code> function.</p>
+
+<pre><code class="language-bash">go get -u github.com/terraform-providers/terraform-provider-aws/aws
+</code></pre>
+
+<pre><code class="language-go">import (
+    ...
+  &quot;github.com/terraform-providers/terraform-provider-aws/aws&quot;
+)
+</code></pre>
+
+<pre><code class="language-go">func main() {
+    ...
+  platform.AddProvider(&quot;aws&quot;, aws.Provider())
+}
+</code></pre>
+
+<p>Your code can include more than one provider, for example, if the code is to create host in the  cloud or different platforms this code has to import all the packages and add those that are needed by the Terraform code.</p>
+
+<p>The only Provider that is loaded by default is <code>null</code>. It&rsquo;s a resource that allows you to configure provisioners that are not directly associated with a single existing resource.</p>
+
+<h3 id="provisioners">Provisioners</h3>
+
+<p>Every Terraform code uses at least one Provider, but not all the Terraform codes uses a provisioner. In this example we are using the provisioner <code>file</code>, so same as with providers, we have to get it, import it and add it.</p>
+
+<pre><code class="language-bash">go get -u github.com/hashicorp/terraform/builtin/provisioners/file
+</code></pre>
+
+<pre><code class="language-go">import (
+    ...
+  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
+)
+</code></pre>
+
+<pre><code class="language-go">func main() {
+    ...
+  platform.AddProvisioner(&quot;file&quot;, file.Provisioner())
+}
+</code></pre>
+
+<p>The most common and useful provisioner to use are:</p>
+
+<ul>
+<li><code>file</code>: used to copy files or directories from the local machine to the newly created resource.</li>
+<li><code>local-exec</code>: invokes a local executable after a resource is created on the local machine.</li>
+<li><code>remote-exec</code>: invokes a script on a remote resource after it is created.</li>
+</ul>
+
+<p>Lokk at the sample code below to know how to import the packge and to call the method <code>AddProvisioner()</code>  for these Provisioners:</p>
+
+<pre><code class="language-go">import (
+  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
+  localexec &quot;github.com/hashicorp/terraform/builtin/provisioners/local-exec&quot;
+  remoteexec &quot;github.com/hashicorp/terraform/builtin/provisioners/remote-exec&quot;
+)
+...
+platform.AddProvisioner(&quot;file&quot;, file.Provisioner())
+platform.AddProvisioner(&quot;local-exec&quot;, localexec.Provisioner())
+platform.AddProvisioner(&quot;remote-exec&quot;, remoteexec.Provisioner())
+</code></pre>
+
+<p>If you use Chef or Salt as configuration managers, there are provisioners for both that can configure the newly created resource.</p>
+
+<h3 id="variables">Variables</h3>
+
+<p>The Terraform code allows you to define and use variables and variables that behaves like constants. This may be an optional feature if you use Go templates to create the Terraform code with static values or assigning default values to variables. If you are using plain text code, just like in this example, then variables is something you may want to use.</p>
+
+<p>In this example we have two variables: <code>count</code> and <code>key_name</code>. Only <code>count</code> has a default value so not adding a value for <code>key_name</code> will cause an error.</p>
+
+<pre><code class="language-go">func main() {
+  count := 1
+  keyName := &quot;username&quot;
+    ...
+  platform.Var(&quot;count&quot;, 1)
+  platform.Var(&quot;key_name&quot;, keyName)
+}
+</code></pre>
+
+<p>Other option would be to use the function <code>AddVars()</code> which is kind of handy when you get the variables after unmarshall a JSON, Yaml or Toml file with the values.</p>
+
+<pre><code class="language-go">func main() {
+  vars := map[string]interface{}{
+    &quot;count&quot;:    &quot;1&quot;,
+    &quot;key_name&quot;: &quot;username&quot;,
+  }
+  ...
+  platform.AddVars(vars)
+}
+</code></pre>
+
+<h3 id="apply-changes">Apply changes</h3>
+
+<p>Once you have the Platform with the Code, Providers, Provisioners and the Variables loaded you can apply the code to the platform to get the changes done. It could be to modify the infrastructure (i.e. increasing or decreasing the number of instances) or to destroy everything done.</p>
+
+<p>To achive this we use the function <code>Apply(bool)</code> which receives a boolean to know if the actions to apply are to destroy/terminate the infrastructure or not.</p>
+
+<pre><code class="language-go">func main() {
+    ...
+  terminate := (count == 0)
+  if err := platform.Apply(terminate); err != nil {
+    log.Fatalf(&quot;Fail to apply the changes to the platform. %s&quot;, err)
+  }
+}
+</code></pre>
+
+<h3 id="state">State</h3>
+
+<p>After applying the changes the infrastructure state also change. This state will be needed to do more changes to this infrastructure later, such as increase or decrease the number of instances, or destroy everything to save money.</p>
+
+<p>So, as you have notice, it&rsquo;s important to make this state persistent saving it into a file after applying the changes and to load the state (if any) before applying the changes.</p>
+
+<pre><code class="language-go">const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
+
+func main() {
+	...
+  if _, err := platform.ReadStateFile(stateFilename); err != nil {
+    log.Fatalf(&quot;Fail to load the state of the platform from %s. %s&quot;, stateFilename, err)
+  }
+    ...
+    // here is where Apply() is call
+    ...
+  if err := platform.WriteStateFile(stateFilename); err != nil {
+    log.Fatalf(&quot;Fail to save the state of the platform to file %s. %s&quot;, stateFilename, err)
+  }
+}
+</code></pre>
+
+<p>And that&rsquo;s basically all you need to use Terranova to help you to use Terraform from a Go program. The entire code looks like this:</p>
+
+<pre><code class="language-go">package main
+
+import (
+  &quot;log&quot;
+  &quot;os&quot;
+  &quot;strconv&quot;
+
+  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
+  &quot;github.com/johandry/terranova&quot;
+  &quot;github.com/terraform-providers/terraform-provider-aws/aws&quot;
+)
+
+var code string
+
+const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
+
+func main() {
+  count := 1
+  keyName := &quot;username&quot;
+
+  platform, err := terranova.NewPlatform(code).
+    AddProvider(&quot;aws&quot;, aws.Provider()).
+    AddProvisioner(&quot;file&quot;, file.Provisioner()).
+    Var(&quot;count&quot;, strconv.Itoa(count)).
+    Var(&quot;key_name&quot;, keyName).
+    ReadStateFromFile(stateFilename)
+    
+  if err != nil {
+    if os.IsNotExist(err) {
+      log.Printf(&quot;[DEBUG] state file %s does not exists&quot;, stateFilename)
+	} else {
+	  log.Fatalf(&quot;Fail to load the initial state of the platform from file %s. %s&quot;, stateFilename, err)
+	}
+  }
+
+  terminate := (count == 0)
+  if err := platform.Apply(terminate); err != nil {
+    log.Fatalf(&quot;Fail to apply the changes to the platform. %s&quot;, err)
+  }
+
+  if _, err := platform.WriteStateFile(stateFilename); err != nil {
+    log.Fatalf(&quot;Fail to save the final state of the platform to file %s. %s&quot;, stateFilename, err)
+  }
+}
+
+func init() {
+  code = `
+  variable &quot;count&quot;    { default = 2 }
+  variable &quot;key_name&quot; {}
+  provider &quot;aws&quot; {
+    region        = &quot;us-west-2&quot;
+  }
+  resource &quot;aws_instance&quot; &quot;server&quot; {
+    instance_type = &quot;t2.micro&quot;
+    ami           = &quot;ami-6e1a0117&quot;
+    count         = &quot;${var.count}&quot;
+    key_name      = &quot;${var.key_name}&quot;
+  }
+  provisioner &quot;file&quot; {
+    content     = &quot;ami used: ${self.ami}&quot;
+    destination = &quot;/tmp/file.log&quot;
+  }
+`
+}
+
+</code></pre>
+
+<p>This code example with a few more improvements is located in the Terranova <a href="https://github.com/johandry/terranova/blob/master/example/main.go">example directory</a>.</p>
+
+<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package dirrectly just like Terranova does it.</p>
+
+<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform dirrectly. The Hashicorp&rsquo;s Terraform code change as well as their API and they are not forced to keep the contract because it&rsquo;s their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other&rsquo;s (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
+
+<p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we&rsquo;ll include it.</p>
+
+<p>This is not the last post about this topic, next post will be about how to use the Hashicorp Terraform Go just like Terranova uses it, and there will be a more about how to use your infrastructure code as a Go template, using Hooks to execute some actions for every Terraform activity such as logging, print output, update counters; and how to get values from your new infrastructure such as number of instances created/updated, IP or DNS addresses.</p>
+
+
+  
+<div class="prev-next-post pure-g">
+  <div class="pure-u-1-24" style="text-align: left;">
+    
+    <a href="http://blog.johandry.com/post/a-new-blog-on-github/"><i class="fa fa-chevron-left"></i></a>
+    
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="prev">
+      <a href="http://blog.johandry.com/post/a-new-blog-on-github/">A New Blog on Github</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-2-24">
+    &nbsp;
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="next">
+      <a href="http://blog.johandry.com/post/intro-microservice-in-go-1/">Introduction to Microservices in Go, part 1</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-1-24" style="text-align: right;">
+    
+    <a href="http://blog.johandry.com/post/intro-microservice-in-go-1/"><i class="fa fa-chevron-right"></i></a>
+    
+  </div>
+</div>
+
+
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'johandry';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+</div>
+</div>
+<script src="http://blog.johandry.com/js/ui.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-51046735-3', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+</body>
+</html>
+

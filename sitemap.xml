@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>http://blog.johandry.com/post/terranova-terraform-from-go/</loc>
+    <lastmod>2017-10-31T20:21:07-07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>http://blog.johandry.com/post/a-new-blog-on-github/</loc>
     <lastmod>2017-10-28T23:42:14-07:00</lastmod>
   </url>
@@ -74,6 +79,18 @@
   <url>
     <loc>http://blog.johandry.com/tags/</loc>
     <lastmod>2017-10-28T23:42:14-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/terraform/</loc>
+    <lastmod>2017-10-31T20:21:07-07:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/terranova/</loc>
+    <lastmod>2017-10-31T20:21:07-07:00</lastmod>
     <priority>0</priority>
   </url>
   
