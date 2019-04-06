@@ -1,30 +1,30 @@
 ---
-title: "Terranova: Using Terraform from Go with Terranova"
+title: "Terranova: Using Terraform from Go"
 date: 2017-10-31T20:21:07-07:00
 tags: ["Golang", "Terraform", "Terranova"]
 toc: true
 draft: true
 ---
 
-[Terraform](http://terraform.io) is an amazing tool made by [HashiCorp](https://www.hashicorp.com) to describe infrastructure as a code. The use of Terraform is quite simple. After download the binary you need to create a terraform configuration file or files that describe the infrastructure to build. The first time you have to initialize terraform (`terraform init`) to download all the dependencies, then apply the changes (`terraform apply`). Any further change is as simple as modify the configuration file and apply the changes again. When the infrastructure is not needed, just destroy it (`terraform destroy`).
+[Terraform](http://terraform.io) is an amazing tool made by [HashiCorp](https://www.hashicorp.com) to describe infrastructure as a code. Terraform allow us to build, change, and do versioning of the infrastructure safely and efficiently. The use of Terraform is quite simple, after download the binary you need to create a terraform configuration file or files to describe the infrastructure to build. The first time you have to initialize terraform (`terraform init`) to download all the dependencies and then apply the changes (`terraform apply`). Any further change is as simple as modify the configuration file and apply the changes again. When the infrastructure is not needed, you just destroy it (`terraform destroy`).
 
-Many developers automate terraform tasks by using the binary with a script or a program and that’s totally fine. However if you are coding in Go and Terraform is made in Go (free and available on [GitHub](https://github.com/hashicorp/terraform)), why not use the Terraform packages instead of the binary?
+Many developers automate terraform tasks calling the binary from a script or a program and that’s totally fine. However if you are coding in Go and knowing that Terraform is made in Go (free and available on [GitHub](https://github.com/hashicorp/terraform)), why not use the Terraform packages instead of the binary?
 
-One reason - and, to me, maybe the most important - to use the Terraform package instead of the binary is to provide to the users one single executable file to build and change the infrastructure. In a regular scenario the user have to download the Terraform binary, the configuration files (maybe more than one) and the instructions or a script to automate the process. Too many files, steps and dependencies, right?
+One reason - and, to me, maybe the most important - to use the Terraform package instead of the binary is to provide to the users one single executable file to build and change the infrastructure. In a regular scenario the user have to download the Terraform binary, the configuration files (usually more than one) and the instructions or a script automating the process. Too many files, steps and dependencies, right?
 
 The use of the Terraform package is simple once you are familiar with it. In order to make it simpler and easier to you, I will explain how to use the Go package **[Terranova](https://github.com/johandry/terranova)**.
 
 ## How to use the Terranova library
 
-There are several objects needed by Terranova and Terraform to work:
+There are several objects needed by Terranova and therefore by Terraform to work:
 
-- **Code**: It's basically the content of the configuration file, it may be a plain text or a Go template. This is the Infrastructure as a code.
+- **Code**: It's basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.
 - **Providers**: A Provider is the interface between terraform and the underlying platform which is usually an IaaS (i.e. AWS, GCP, MS Azure, VMWare), PaaS (i.e. Heroku) or SaaS (i.e. DNSimple). The entire list is here: https://www.terraform.io/docs/providers/
 - **Provisioners**: The Provisioners are used to execute scripts on a local or remote machine, transfer files to remote machines and handling of configuration managers (i.e. Check, Salt). To know more or get the entire list, check this out: https://www.terraform.io/docs/provisioners/
 - **Variables**: The Code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.
 - **State**: This is final state of the infrastructure when the build or a change is done. It's important to keep the state in a save place to apply the further changes or destroy everything that was built.
 
-The first step is to get and import the package:
+The first step is to get and import the Terranova package:
 
 ```bash
 go get -u github.com/johandry/terranova
@@ -66,13 +66,13 @@ func init() {
 }
 ```
 
-In this example the Terraform code is to create the given number of AWS EC2 Ubuntu instances on the AWS region `us-west-2`.
+In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region `us-west-2`.
 
-Now we are ready to create an instance of the [`Platform` struct](https://github.com/johandry/terranova/blob/master/platform.go) using `NewPlatform()` passing the code as second parameter.
+Now we are ready to create an instance of the [`Platform` struct](https://github.com/johandry/terranova/blob/master/platform.go) using `NewPlatform()` passing the code as a parameter.
 
 ```go
 func main() {
-  platform, err := terranova.NewPlatform("", code)
+  platform, err := terranova.NewPlatform(code)
   if err != nil {
     log.Fatalf("Fail to initialize the platform. %s", err)
   }
@@ -103,6 +103,8 @@ func main() {
 
 Your code can include more than one provider, for example, if the code is to create host in the  cloud or different platforms this code has to import all the packages and add those that are needed by the Terraform code.
 
+The only Provider that is loaded by default is `null`. It's a resource that allows you to configure provisioners that are not directly associated with a single existing resource.
+
 ### Provisioners
 
 Every Terraform code uses at least one Provider, but not all the Terraform codes uses a provisioner. In this example we are using the provisioner `file`, so same as with providers, we have to get it, import it and add it.
@@ -131,9 +133,21 @@ The most common and useful provisioner to use are:
 * `local-exec`: invokes a local executable after a resource is created on the local machine.
 * `remote-exec`: invokes a script on a remote resource after it is created. 
 
-If you use Chef or Salt as configuration managers, there are provisioners for both that can configure the newly created resource.
+Lokk at the sample code below to know how to import the packge and to call the method `AddProvisioner()`  for these Provisioners:
 
-The only Provisioner that is loaded by default is `null_resource`. It's a resource that allows you to configure provisioners that are not directly associated with a single existing resource.
+```go
+import (
+  "github.com/hashicorp/terraform/builtin/provisioners/file"
+  localexec "github.com/hashicorp/terraform/builtin/provisioners/local-exec"
+  remoteexec "github.com/hashicorp/terraform/builtin/provisioners/remote-exec"
+)
+...
+platform.AddProvisioner("file", file.Provisioner())
+platform.AddProvisioner("local-exec", localexec.Provisioner())
+platform.AddProvisioner("remote-exec", remoteexec.Provisioner())
+```
+
+If you use Chef or Salt as configuration managers, there are provisioners for both that can configure the newly created resource.
 
 ### Variables
 
@@ -192,7 +206,7 @@ const stateFilename = "aws-ec2-ubuntu.tfstate"
 func main() {
 	...
   if _, err := platform.ReadStateFile(stateFilename); err != nil {
-    log.Panicf("Fail to load the state of the platform from %s. %s", stateFilename, err)
+    log.Fatalf("Fail to load the state of the platform from %s. %s", stateFilename, err)
   }
     ...
     // here is where Apply() is call
@@ -210,6 +224,7 @@ package main
 
 import (
   "log"
+  "os"
   "strconv"
 
   "github.com/hashicorp/terraform/builtin/provisioners/file"
@@ -225,34 +240,34 @@ func main() {
   count := 1
   keyName := "username"
 
-  platform, err := terranova.NewPlatform("", code)
+  platform, err := terranova.NewPlatform(code).
+    AddProvider("aws", aws.Provider()).
+    AddProvisioner("file", file.Provisioner()).
+    Var("count", strconv.Itoa(count)).
+    Var("key_name", keyName).
+    ReadStateFromFile(stateFilename)
+    
   if err != nil {
-    log.Fatalf("Fail to initialize the platform. %s", err)
-  }
-
-  platform.AddProvider("aws", aws.Provider())
-  platform.AddProvisioner("file", file.Provisioner())
-
-  platform.Var("count", strconv.Itoa(count))
-  platform.Var("key_name", keyName)
-  
-  if _, err := platform.ReadStateFile(stateFilename); err != nil {
-    log.Panicf("Fail to load the initial state of the platform from file %s. %s", stateFilename, err)
+    if os.IsNotExist(err) {
+      log.Printf("[DEBUG] state file %s does not exists", stateFilename)
+	} else {
+	  log.Fatalf("Fail to load the initial state of the platform from file %s. %s", stateFilename, err)
+	}
   }
 
   terminate := (count == 0)
-    if err := platform.Apply(terminate); err != nil {
+  if err := platform.Apply(terminate); err != nil {
     log.Fatalf("Fail to apply the changes to the platform. %s", err)
   }
 
-  if err := platform.WriteStateFile(stateFilename); err != nil {
+  if _, err := platform.WriteStateFile(stateFilename); err != nil {
     log.Fatalf("Fail to save the final state of the platform to file %s. %s", stateFilename, err)
   }
 }
 
 func init() {
   code = `
-  variable "count" 		{ default = 2 }
+  variable "count"    { default = 2 }
   variable "key_name" {}
   provider "aws" {
     region        = "us-west-2"
@@ -269,206 +284,15 @@ func init() {
   }
 `
 }
-```
-
-### Modules and Terraform version
-
-
-
-## How Terranova is made
-
-Then we need a Go struct to store everything terraform needs to build or change an infrastructure such as:
-
-* **Code**: It's basically the content of the configuration file, it may be a plain text or a Go template. This is the Infrastructure as a code.
-* **List of Providers**: A Provider is the interface between terraform and the underlying platform which is usually an IaaS (i.e. AWS, GCP, MS Azure, VMWare), PaaS (i.e. Heroku) or SaaS (i.e. DNSimple)
-* **List of Provisioners**: The Provisioners are used to execute scripts on a local or remote machine, transfer files to remote machines and handling of configuration managers (i.e. Check, Salt)
-* **List of variables**: The code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.
-* **State**: This is final state of the infrastructure when the build or a change is done. It's important to keep the state to apply the further changes or destroy everything that was built.
-
-  There are other objects that are required by terraform and it's optional to store them, check the [`Platform` struct](https://github.com/johandry/terranova/blob/master/platform.go) below:
-
-```go
-// Platform is the platform to be managed by Terraform
-type Platform struct {
-  Path             string
-  Code             string
-  Providers        map[string]terraform.ResourceProvider
-  Provisioners     map[string]terraform.ResourceProvisioner
-  vars             map[string]interface{}
-  state            *terraform.State
-  plan             *terraform.Plan
-  mod              *module.Tree
-  context          *terraform.Context
-  providerResolver terraform.ResourceProviderResolver
-  provisioners     map[string]terraform.ResourceProvisionerFactory
-}
-```
-
-`Providers` and `Provisioners` are exported to the user, `providerResolver` and `provisioners` are basically the same information but as Terraform expect them. It's required to create a function to create the latest from the formers. Check [`updateProviders()`](https://github.com/johandry/terranova/blob/master/provider.go) and [`updateProvisioners()`](https://github.com/johandry/terranova/blob/master/provisioner.go)
-
-The `New()` function is to make a platform instance with initial default values:
-
-```go
-// New return an instance of Platform
-func New(path string, code string) (*Platform, error) {
-  platform := &Platform{
-    Path: path,
-    Code: code,
-  }
-
-  ...
-
-  return platform, nil
-}
-```
-
-In `New()` is initialized the platform with default providers or provisioners that most of the time are required. Check [`defaultProvisioners()`](https://github.com/johandry/terranova/blob/master/provisioner.go) and [`updateProviders()`](https://github.com/johandry/terranova/blob/master/provider.go) to add those you need but are not by default in Platform struct.
-
-The way Terraform use the code is through a terraform module. We need to create a function to create a terraform module from the code. The code has to be saved in a temporally file, that's the reason of the `path` variable, to store the temporally file there. If `path` is not set, a temporally directory will be created.
 
 ```
-func (p *Platform) setModule() (*module.Tree, error) {
-  var cfgPath = p.Path
-  if len(cfgPath) == 0 {
-    tmpDir, err := ioutil.TempDir("", "terranova")
-    if err != nil {
-      return nil, err
-    }
-    cfgPath = tmpDir
-    defer os.RemoveAll(cfgPath)
-  }
 
-  if len(p.Code) > 0 {
-    cfgFileName := filepath.Join(cfgPath, "main.tf")
-    cfgFile, err := os.Create(cfgFileName)
-    if err != nil {
-      return nil, err
-    }
-    _, err = io.Copy(cfgFile, strings.NewReader(p.Code))
-    if err != nil {
-      return nil, err
-    }
-    cfgFile.Close()
-    defer os.Remove(cfgFileName)
-  }
+This code example with a few more improvements is located in the Terranova [example directory](https://github.com/johandry/terranova/blob/master/example/main.go).
 
-  mod, err := module.NewTreeModule("", cfgPath)
-  if err != nil {
-    return nil, err
-  }
-  modStorage := &getter.FolderStorage{
-    StorageDir: filepath.Join(cfgPath, ".tfmodules"),
-  }
-  if err = mod.Load(modStorage, module.GetModeNone); err != nil {
-    return nil, err
-  }
-  p.mod = mod
+The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp's Terraform package dirrectly just like Terranova does it.
 
-  return p.mod, nil
-}
-```
+There is an advantage of using Terranova vs using Hashicorp's Terraform dirrectly. The Hashicorp's Terraform code change as well as their API and they are not forced to keep the contract because it's their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other's (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.
 
-Now we are ready to complete the `New()` function:
+Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we'll include it. 
 
-```
-func New(path string, code string) (*Platform, error) {
-  platform := &Platform{
-    Path: path,
-    Code: code,
-  }
-  platform.Providers = defaultProviders()
-  platform.updateProviders()
-  platform.Provisioners = defaultProvisioners()
-  platform.updateProvisioners()
-
-  if _, err := platform.setModule(); err != nil {
-    return platform, err
-  }
-
-  return platform, nil
-}
-```
-
-The `terraform apply` workflow is like this:
-
-1. Create the Terraform Context. A Context is a struct with some configuration parameters required by terraform such as the current state (initially is an empty state), list of variables, the module that has the configuration file or code, list of providers and provisioners.
-2. Create the execution plan for that context and refresh it.
-3. Apply the changes
-
-Let's create an `Apply` function to implement these actions:
-
-```
-func (p *Platform) Apply(destroy bool) error {
-  if p.context == nil {
-    if _, err := p.Context(destroy); err != nil {
-      return err
-    }
-  }
-
-  if _, err := p.context.Plan(); err != nil {
-    return err
-  }
-
-  if _, err := p.context.Refresh(); err != nil {
-    return err
-  }
-
-  state, err := p.context.Apply()
-  if err != nil {
-    return err
-  }
-  p.state = state
-
-  return nil
-}
-```
-
-To create the terraform context is basically to use `terraform.NewContext(ctxOpts)` function passing the context options struct with the current state, list of variables, the module, list of providers and provisioners. Check [`Context()`](https://github.com/johandry/terranova/blob/master/platform.go)
-
-```
-ctxOpts := &terraform.ContextOpts{
-  Destroy:          destroy,
-  State:            p.state,
-  Variables:        p.vars,
-  Module:           p.mod,
-  ProviderResolver: p.providerResolver,
-  Provisioners:     p.provisioners,
-}
-
-ctx, err := terraform.NewContext(ctxOpts)
-```
-
-When `Apply()` finish, the final state will be stored at the `state` variable. It's important to keep this state if we are planning to change the infrastructures or destroy it. It may be useful to save this state to a file and terraform provide us two functions for that:
-
-* `func (terraform) WriteState(state, buffer) error`: Save the state into a buffer that can be saved to a file later.
-* `func (terraform) ReadState(buffer) (state, error)`: The buffer has the state in a text form (i.e. read from a file) and ReadState store that buffer into the state variable to be used by terraform later.
-
-## Providers and Provisioners
-
-Some default providers that you can load by default are:
-
-* `template` at `github.com/terraform-providers/terraform-provider-template/template`
-* `null` at `github.com/terraform-providers/terraform-provider-null/null`
-
-It’s up to you to include more providers, all that your code requires. For example, if you will create an AWS platform you need to import `github.com/terraform-providers/terraform-provider-aws/aws` and add the provider.
-
-You can create a function to adds them like this:
-
-```
-// AddProvider adds a new provider to the providers list
-func (p *Platform) AddProvider(name string, provider terraform.ResourceProvider) *Platform {
-  if p.Providers == nil {
-    p.Providers = defaultProviders()
-  }
-  p.Providers[name] = provider
-
-  p.updateProviders()
-
-  return p
-}
-```
-
-A possible default list of provisioners are: `local-exec`, `remote-exec` and `file`, all of them are located in the Terraform library (`github.com/hashicorp/terraform/builtin/provisioners`).
-
-If it's required to add more provisioners, do a function named `AddProvisioner()` very similar to `AddProvider()`
-
+This is not the last post about this topic, next post will be about how to use the Hashicorp Terraform Go just like Terranova uses it, and there will be a more about how to use your infrastructure code as a Go template, using Hooks to execute some actions for every Terraform activity such as logging, print output, update counters; and how to get values from your new infrastructure such as number of instances created/updated, IP or DNS addresses.
