@@ -22,7 +22,7 @@ To create a new post execute:
 make post T='Title of the Post'
 ```
 
-Then edit the file `content/post/<title-of-the-post>.md` to add the post content. Use the command  `hugo server -D` and open http://localhost:1331 to view the live changes to the new post.
+Then edit the file `content/post/<title-of-the-post>.md` to add the post content. Use the command  `hugo server -D` and open http://localhost:1313 to view the live changes to the new post.
 
 Make sure to:
 
