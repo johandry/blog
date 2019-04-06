@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.30.2" />
+  <meta name="generator" content="Hugo 0.49.2" />
 
   <title>Introduction to Microservices in Go, part 1 &middot; Johandry&#39;s Blog</title>
 
@@ -36,6 +36,9 @@
   <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
 
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
   
 
   
@@ -62,7 +65,9 @@
   <link rel="shortcut icon" href="http://blog.johandry.com/img/favicon.ico" type="image/x-icon" />
 
   
-    <link rel="stylesheet" href="http://blog.johandry.com/css/my.css">
+    
+        <link rel="stylesheet" href="http://blog.johandry.com/css/my.css">
+    
   
   
 
@@ -122,12 +127,6 @@
   <div class="pure-menu social">
   <ul class="pure-menu-list">
 
-    
-
-    
-    <li class="pure-menu-item">
-      <a class="pure-menu-link" href="https://about.me/johandry" target="_blank"><i class="fa fa-user-circle fa-fw"></i>About.me</a>
-    </li>
     
 
     
@@ -278,22 +277,6 @@
 </div>
 
   
-    <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#a-simple-restful-api">A simple RESTful API</a></li>
-<li><a href="#let-s-speak-in-json">Let&rsquo;s speak in JSON</a></li>
-<li><a href="#returning-just-one-movie">Returning just one movie</a></li>
-<li><a href="#let-s-read-json">Let&rsquo;s read JSON</a></li>
-<li><a href="#build-and-ship-it">Build and Ship it</a></li>
-<li><a href="#one-more-thing">One more thing &hellip;</a></li>
-</ul></li>
-</ul>
-</nav>
-  
-
-  
 
 <p>This is a very simple example about how to build a microservice in Go. It&rsquo;s meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.</p>
 
@@ -323,28 +306,28 @@
 
 <p>Now lets create a simple web server to print the microservice version when we hit the URL <code>/api/v1/version</code></p>
 
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 2</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 3</span><span style="color:#f92672">import</span> (
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 4</span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 5</span>	<span style="color:#e6db74">&#34;log&#34;</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 6</span>	<span style="color:#e6db74">&#34;net/http&#34;</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 7</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 8</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 9</span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">8086</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">10</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">11</span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">version</span> = <span style="color:#e6db74">&#34;0.1.0&#34;</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">12</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">13</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">14</span>	<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/api/v1/version&#34;</span>, <span style="color:#a6e22e">handleVersion</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">15</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">16</span>	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Starting movies microservice on port %d&#34;</span>, <span style="color:#a6e22e">port</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">17</span>	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatal</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ListenAndServe</span>(<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;:%d&#34;</span>, <span style="color:#a6e22e">port</span>), <span style="color:#66d9ef">nil</span>))
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">18</span>}
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">19</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">20</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleVersion</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">21</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, <span style="color:#e6db74">&#34;Version: %s&#34;</span>, <span style="color:#a6e22e">version</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">22</span>}</code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1</span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3</span><span style="color:#f92672">import</span> (
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4</span>	<span style="color:#e6db74">&#34;fmt&#34;</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5</span>	<span style="color:#e6db74">&#34;log&#34;</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6</span>	<span style="color:#e6db74">&#34;net/http&#34;</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9</span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">port</span> = <span style="color:#ae81ff">8086</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11</span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">version</span> = <span style="color:#e6db74">&#34;0.1.0&#34;</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14</span>	<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/api/v1/version&#34;</span>, <span style="color:#a6e22e">handleVersion</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16</span>	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Starting movies microservice on port %d&#34;</span>, <span style="color:#a6e22e">port</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17</span>	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatal</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ListenAndServe</span>(<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Sprintf</span>(<span style="color:#e6db74">&#34;:%d&#34;</span>, <span style="color:#a6e22e">port</span>), <span style="color:#66d9ef">nil</span>))
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">18</span>}
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">19</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">20</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleVersion</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">21</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, <span style="color:#e6db74">&#34;Version: %s&#34;</span>, <span style="color:#a6e22e">version</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">22</span>}</code></pre></div>
 
 <p>At line #4 we call the <code>HandleFunc()</code> method to create a <code>Handler</code> type on the default handler <code>DefaultServerMux</code> from the <code>net/http</code> package, mapping the path <code>&quot;/api/v1/version&quot;</code> to the function <code>handleVersion()</code> defined at line #20.</p>
 
@@ -362,23 +345,23 @@
 
 <p>To return the version we are going to encapsulate it in a structure (line #1 to #3), modify the global variable <code>version</code> to be of the defined <code>Version</code> type (line #5) and use the <code>init()</code> function to initialize it (line #8).</p>
 
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 1</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 2</span>	<span style="color:#a6e22e">version</span> <span style="color:#66d9ef">string</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 3</span>}
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 4</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 5</span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">version</span> <span style="color:#a6e22e">Version</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 6</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 7</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 8</span>	<span style="color:#a6e22e">version</span> = <span style="color:#a6e22e">Version</span>{<span style="color:#e6db74">&#34;0.1.0&#34;</span>}
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;"> 9</span>}
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">10</span>
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">11</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleVersion</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">12</span>	<span style="color:#a6e22e">verJSON</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">Marshal</span>(<span style="color:#a6e22e">version</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">13</span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">14</span>		panic(<span style="color:#e6db74">&#34;Error marshaling version&#34;</span>)
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">15</span>	}
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">16</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, string(<span style="color:#a6e22e">verJSON</span>))
-<span style="color:#7c7c79;margin-right:0.4em;padding:00.4em00.4em;">17</span>}</code></pre></div>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 1</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 2</span>	<span style="color:#a6e22e">version</span> <span style="color:#66d9ef">string</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 3</span>}
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 4</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 5</span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">version</span> <span style="color:#a6e22e">Version</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 6</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 7</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 8</span>	<span style="color:#a6e22e">version</span> = <span style="color:#a6e22e">Version</span>{<span style="color:#e6db74">&#34;0.1.0&#34;</span>}
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79"> 9</span>}
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">10</span>
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">11</span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleVersion</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">12</span>	<span style="color:#a6e22e">verJSON</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">Marshal</span>(<span style="color:#a6e22e">version</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">13</span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">14</span>		panic(<span style="color:#e6db74">&#34;Error marshaling version&#34;</span>)
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">15</span>	}
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">16</span>	<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">rw</span>, string(<span style="color:#a6e22e">verJSON</span>))
+<span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7c7c79">17</span>}</code></pre></div>
 
 <p>The version handler function was also modified to marshal (to encode) the <code>version</code> variable to JSON. If there is an error marshaling the structure the program will panic, if not we convert <code>verJSON</code> to string because <a href="https://golang.org/pkg/encoding/json/#Marshal"><code>Marshal()</code></a> returns the JSON as a <code>[]byte</code> type but <a href="https://golang.org/pkg/fmt/#Fprintf"><code>Fprintf()</code></a> is waiting for a string.</p>
 
@@ -765,15 +748,19 @@ curl http://localhost:8086/api/v1/version
 
 
 <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-51046735-3', 'auto');
-  ga('send', 'pageview');
-
+    ga('create', 'UA-51046735-3', 'auto');
+    ga('send', 'pageview');
+  }
 </script>
+
+
 
 
 
