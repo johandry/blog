@@ -246,9 +246,9 @@ func main() {
     Var("key_name", keyName).
     ReadStateFromFile(stateFilename)
 
-    if err != nil {
-      if os.IsNotExist(err) {
-        log.Printf("[DEBUG] state file %s does not exists", stateFilename)
+  if err != nil {
+    if os.IsNotExist(err) {
+      log.Printf("[DEBUG] state file %s does not exists", stateFilename)
     } else {
       log.Fatalf("Fail to load the initial state of the platform from file %s. %s", stateFilename, err)
     }
