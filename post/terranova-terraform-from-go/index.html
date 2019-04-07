@@ -395,7 +395,7 @@ func init() {
 <li><code>remote-exec</code>: invokes a script on a remote resource after it is created.</li>
 </ul>
 
-<p>Lokk at the sample code below to know how to import the packge and to call the method <code>AddProvisioner()</code>  for these Provisioners:</p>
+<p>Look at the sample code below to know how to import the package and to call the method <code>AddProvisioner()</code>  for these Provisioners:</p>
 
 <pre><code class="language-go">import (
   &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
@@ -441,7 +441,7 @@ platform.AddProvisioner(&quot;remote-exec&quot;, remoteexec.Provisioner())
 
 <p>Once you have the Platform with the Code, Providers, Provisioners and the Variables loaded you can apply the code to the platform to get the changes done. It could be to modify the infrastructure (i.e. increasing or decreasing the number of instances) or to destroy everything done.</p>
 
-<p>To achive this we use the function <code>Apply(bool)</code> which receives a boolean to know if the actions to apply are to destroy/terminate the infrastructure or not.</p>
+<p>To achieve this we use the function <code>Apply(bool)</code> which receives a boolean to know if the actions to apply are to destroy/terminate the infrastructure or not.</p>
 
 <pre><code class="language-go">func main() {
     ...
@@ -461,7 +461,7 @@ platform.AddProvisioner(&quot;remote-exec&quot;, remoteexec.Provisioner())
 <pre><code class="language-go">const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
 
 func main() {
-	...
+  ...
   if _, err := platform.ReadStateFile(stateFilename); err != nil {
     log.Fatalf(&quot;Fail to load the state of the platform from %s. %s&quot;, stateFilename, err)
   }
@@ -502,13 +502,13 @@ func main() {
     Var(&quot;count&quot;, strconv.Itoa(count)).
     Var(&quot;key_name&quot;, keyName).
     ReadStateFromFile(stateFilename)
-    
-  if err != nil {
-    if os.IsNotExist(err) {
-      log.Printf(&quot;[DEBUG] state file %s does not exists&quot;, stateFilename)
-	} else {
-	  log.Fatalf(&quot;Fail to load the initial state of the platform from file %s. %s&quot;, stateFilename, err)
-	}
+
+    if err != nil {
+      if os.IsNotExist(err) {
+        log.Printf(&quot;[DEBUG] state file %s does not exists&quot;, stateFilename)
+    } else {
+      log.Fatalf(&quot;Fail to load the initial state of the platform from file %s. %s&quot;, stateFilename, err)
+    }
   }
 
   terminate := (count == 0)
@@ -545,9 +545,9 @@ func init() {
 
 <p>This code example with a few more improvements is located in the Terranova <a href="https://github.com/johandry/terranova/blob/master/example/main.go">example directory</a>.</p>
 
-<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package dirrectly just like Terranova does it.</p>
+<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package directly just like Terranova does it.</p>
 
-<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform dirrectly. The Hashicorp&rsquo;s Terraform code change as well as their API and they are not forced to keep the contract because it&rsquo;s their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other&rsquo;s (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
+<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform directly. The Hashicorp&rsquo;s Terraform code change as well as their API and they are not forced to keep the contract because it&rsquo;s their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other&rsquo;s (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
 
 <p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we&rsquo;ll include it.</p>
 
