@@ -286,7 +286,7 @@ func init() {
 
 ```
 
-This code example with a few more improvements is located in the Terranova [example directory](https://github.com/johandry/terranova/blob/master/example/main.go).
+This code example with a few more improvements is located in the [Terranova examples repository](https://github.com/johandry/terranova-examples/blob/master/aws/ec2/main.go).
 
 The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp's Terraform package directly just like Terranova does it.
 
