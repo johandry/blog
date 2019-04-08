@@ -314,8 +314,13 @@
 
 func init() {
   code = `
-  variable &quot;count&quot;    { default = 2 }
-  variable &quot;key_name&quot; {}
+  variable &quot;count&quot;            {}
+  variable &quot;public_key_file&quot;  { default = &quot;~/.ssh/id_rsa.pub&quot; }
+  variable &quot;private_key_file&quot; { default = &quot;~/.ssh/id_rsa&quot; }
+  locals {
+    public_key    = &quot;${file(pathexpand(var.public_key_file))}&quot;
+    private_key   = &quot;${file(pathexpand(var.private_key_file))}&quot;
+  }
   provider &quot;aws&quot; {
     region        = &quot;us-west-2&quot;
   }
@@ -323,17 +328,27 @@ func init() {
     instance_type = &quot;t2.micro&quot;
     ami           = &quot;ami-6e1a0117&quot;
     count         = &quot;${var.count}&quot;
-    key_name      = &quot;${var.key_name}&quot;
+    key_name      = &quot;server_key&quot;
+
+    provisioner &quot;file&quot; {
+      content     = &quot;ami used: ${self.ami}&quot;
+      destination = &quot;/tmp/file.log&quot;
+
+      connection {
+        user        = &quot;ubuntu&quot;
+        private_key = &quot;${local.private_key}&quot;
+      }
+    }
   }
-  provisioner &quot;file&quot; {
-    content     = &quot;ami used: ${self.ami}&quot;
-    destination = &quot;/tmp/file.log&quot;
+  resource &quot;aws_key_pair&quot; &quot;keypair&quot; {
+    key_name    = &quot;server_key&quot;
+    public_key  = &quot;${local.public_key}&quot;
   }
 `
 }
 </code></pre>
 
-<p>In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region <code>us-west-2</code>.</p>
+<p>In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region <code>us-west-2</code>. Also to create a Key Pair made from the public key.</p>
 
 <p>Now we are ready to create an instance of the <a href="https://github.com/johandry/terranova/blob/master/platform.go"><code>Platform</code> struct</a> using <code>NewPlatform()</code> passing the code as a parameter.</p>
 
@@ -414,26 +429,23 @@ platform.AddProvisioner(&quot;remote-exec&quot;, remoteexec.Provisioner())
 
 <p>The Terraform code allows you to define and use variables and variables that behaves like constants. This may be an optional feature if you use Go templates to create the Terraform code with static values or assigning default values to variables. If you are using plain text code, just like in this example, then variables is something you may want to use.</p>
 
-<p>In this example we have two variables: <code>count</code> and <code>key_name</code>. Only <code>count</code> has a default value so not adding a value for <code>key_name</code> will cause an error.</p>
+<p>In this example we have three variables: <code>count</code>, <code>public_key_file</code> and <code>private_key_file</code>. The key files variables has a default value so not adding a value for <code>count</code> will cause an error.</p>
 
 <pre><code class="language-go">func main() {
   count := 1
-  keyName := &quot;username&quot;
     ...
-  platform.Var(&quot;count&quot;, 1)
-  platform.Var(&quot;key_name&quot;, keyName)
+  platform.Var(&quot;count&quot;, count)
 }
 </code></pre>
 
-<p>Other option would be to use the function <code>AddVars()</code> which is kind of handy when you get the variables after unmarshall a JSON, Yaml or Toml file with the values.</p>
+<p>Other option would be to use the function <code>BindVars()</code> which is handy when you get the variables after unmarshalling a JSON, Yaml or Toml file with the values.</p>
 
 <pre><code class="language-go">func main() {
   vars := map[string]interface{}{
-    &quot;count&quot;:    &quot;1&quot;,
-    &quot;key_name&quot;: &quot;username&quot;,
+    &quot;count&quot;: 1,
   }
   ...
-  platform.AddVars(vars)
+  platform.BindVars(vars)
 }
 </code></pre>
 
@@ -468,7 +480,7 @@ func main() {
     ...
     // here is where Apply() is call
     ...
-  if err := platform.WriteStateFile(stateFilename); err != nil {
+  if _, err := platform.WriteStateFile(stateFilename); err != nil {
     log.Fatalf(&quot;Fail to save the state of the platform to file %s. %s&quot;, stateFilename, err)
   }
 }
@@ -481,7 +493,6 @@ func main() {
 import (
   &quot;log&quot;
   &quot;os&quot;
-  &quot;strconv&quot;
 
   &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
   &quot;github.com/johandry/terranova&quot;
@@ -494,13 +505,11 @@ const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
 
 func main() {
   count := 1
-  keyName := &quot;username&quot;
 
   platform, err := terranova.NewPlatform(code).
     AddProvider(&quot;aws&quot;, aws.Provider()).
     AddProvisioner(&quot;file&quot;, file.Provisioner()).
-    Var(&quot;count&quot;, strconv.Itoa(count)).
-    Var(&quot;key_name&quot;, keyName).
+    Var(&quot;count&quot;, count).
     ReadStateFromFile(stateFilename)
 
   if err != nil {
@@ -523,8 +532,13 @@ func main() {
 
 func init() {
   code = `
-  variable &quot;count&quot;    { default = 2 }
-  variable &quot;key_name&quot; {}
+  variable &quot;count&quot;            { default = 2 }
+  variable &quot;public_key_file&quot;  { default = &quot;~/.ssh/id_rsa.pub&quot; }
+  variable &quot;private_key_file&quot; { default = &quot;~/.ssh/id_rsa&quot; }
+  locals {
+    public_key    = &quot;${file(pathexpand(var.public_key_file))}&quot;
+    private_key   = &quot;${file(pathexpand(var.private_key_file))}&quot;
+  }
   provider &quot;aws&quot; {
     region        = &quot;us-west-2&quot;
   }
@@ -532,11 +546,21 @@ func init() {
     instance_type = &quot;t2.micro&quot;
     ami           = &quot;ami-6e1a0117&quot;
     count         = &quot;${var.count}&quot;
-    key_name      = &quot;${var.key_name}&quot;
+    key_name      = &quot;server_key&quot;
+
+    provisioner &quot;file&quot; {
+      content     = &quot;ami used: ${self.ami}&quot;
+      destination = &quot;/tmp/file.log&quot;
+
+      connection {
+        user        = &quot;ubuntu&quot;
+        private_key = &quot;${local.private_key}&quot;
+      }
+    }
   }
-  provisioner &quot;file&quot; {
-    content     = &quot;ami used: ${self.ami}&quot;
-    destination = &quot;/tmp/file.log&quot;
+  resource &quot;aws_key_pair&quot; &quot;keypair&quot; {
+    key_name    = &quot;server_key&quot;
+    public_key  = &quot;${local.public_key}&quot;
   }
 `
 }
@@ -547,7 +571,7 @@ func init() {
 
 <p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package directly just like Terranova does it.</p>
 
-<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform directly. The Hashicorp&rsquo;s Terraform code change as well as their API and they are not forced to keep the contract because it&rsquo;s their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other&rsquo;s (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
+<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform directly. The Hashicorp&rsquo;s Terraform code change as well as their package contract and they are not forced to keep it because it&rsquo;s their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
 
 <p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we&rsquo;ll include it.</p>
 
