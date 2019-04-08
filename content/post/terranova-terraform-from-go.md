@@ -46,8 +46,13 @@ var code string
 
 func init() {
   code = `
-  variable "count"    { default = 2 }
-  variable "key_name" {}
+  variable "count"            {}
+  variable "public_key_file"  { default = "~/.ssh/id_rsa.pub" }
+  variable "private_key_file" { default = "~/.ssh/id_rsa" }
+  locals {
+    public_key    = "${file(pathexpand(var.public_key_file))}"
+    private_key   = "${file(pathexpand(var.private_key_file))}"
+  }
   provider "aws" {
     region        = "us-west-2"
   }
@@ -55,17 +60,27 @@ func init() {
     instance_type = "t2.micro"
     ami           = "ami-6e1a0117"
     count         = "${var.count}"
-    key_name      = "${var.key_name}"
+    key_name      = "server_key"
+
+    provisioner "file" {
+      content     = "ami used: ${self.ami}"
+      destination = "/tmp/file.log"
+
+      connection {
+        user        = "ubuntu"
+        private_key = "${local.private_key}"
+      }
+    }
   }
-  provisioner "file" {
-    content     = "ami used: ${self.ami}"
-    destination = "/tmp/file.log"
+  resource "aws_key_pair" "keypair" {
+    key_name    = "server_key"
+    public_key  = "${local.public_key}"
   }
 `
 }
 ```
 
-In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region `us-west-2`.
+In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region `us-west-2`. Also to create a Key Pair made from the public key.
 
 Now we are ready to create an instance of the [`Platform` struct](https://github.com/johandry/terranova/blob/master/platform.go) using `NewPlatform()` passing the code as a parameter.
 
@@ -152,28 +167,25 @@ If you use Chef or Salt as configuration managers, there are provisioners for bo
 
 The Terraform code allows you to define and use variables and variables that behaves like constants. This may be an optional feature if you use Go templates to create the Terraform code with static values or assigning default values to variables. If you are using plain text code, just like in this example, then variables is something you may want to use.
 
-In this example we have two variables: `count` and `key_name`. Only `count` has a default value so not adding a value for `key_name` will cause an error.
+In this example we have three variables: `count`, `public_key_file` and `private_key_file`. The key files variables has a default value so not adding a value for `count` will cause an error.
 
 ```go
 func main() {
   count := 1
-  keyName := "username"
     ...
-  platform.Var("count", 1)
-  platform.Var("key_name", keyName)
+  platform.Var("count", count)
 }
 ```
 
-Other option would be to use the function `AddVars()` which is kind of handy when you get the variables after unmarshall a JSON, Yaml or Toml file with the values.
+Other option would be to use the function `BindVars()` which is handy when you get the variables after unmarshalling a JSON, Yaml or Toml file with the values.
 
 ```go
 func main() {
   vars := map[string]interface{}{
-    "count":    "1",
-    "key_name": "username",
+    "count": 1,
   }
   ...
-  platform.AddVars(vars)
+  platform.BindVars(vars)
 }
 ```
 
@@ -210,7 +222,7 @@ func main() {
     ...
     // here is where Apply() is call
     ...
-  if err := platform.WriteStateFile(stateFilename); err != nil {
+  if _, err := platform.WriteStateFile(stateFilename); err != nil {
     log.Fatalf("Fail to save the state of the platform to file %s. %s", stateFilename, err)
   }
 }
@@ -224,7 +236,6 @@ package main
 import (
   "log"
   "os"
-  "strconv"
 
   "github.com/hashicorp/terraform/builtin/provisioners/file"
   "github.com/johandry/terranova"
@@ -237,13 +248,11 @@ const stateFilename = "aws-ec2-ubuntu.tfstate"
 
 func main() {
   count := 1
-  keyName := "username"
 
   platform, err := terranova.NewPlatform(code).
     AddProvider("aws", aws.Provider()).
     AddProvisioner("file", file.Provisioner()).
-    Var("count", strconv.Itoa(count)).
-    Var("key_name", keyName).
+    Var("count", count).
     ReadStateFromFile(stateFilename)
 
   if err != nil {
@@ -266,8 +275,13 @@ func main() {
 
 func init() {
   code = `
-  variable "count"    { default = 2 }
-  variable "key_name" {}
+  variable "count"            { default = 2 }
+  variable "public_key_file"  { default = "~/.ssh/id_rsa.pub" }
+  variable "private_key_file" { default = "~/.ssh/id_rsa" }
+  locals {
+    public_key    = "${file(pathexpand(var.public_key_file))}"
+    private_key   = "${file(pathexpand(var.private_key_file))}"
+  }
   provider "aws" {
     region        = "us-west-2"
   }
@@ -275,11 +289,21 @@ func init() {
     instance_type = "t2.micro"
     ami           = "ami-6e1a0117"
     count         = "${var.count}"
-    key_name      = "${var.key_name}"
+    key_name      = "server_key"
+
+    provisioner "file" {
+      content     = "ami used: ${self.ami}"
+      destination = "/tmp/file.log"
+
+      connection {
+        user        = "ubuntu"
+        private_key = "${local.private_key}"
+      }
+    }
   }
-  provisioner "file" {
-    content     = "ami used: ${self.ami}"
-    destination = "/tmp/file.log"
+  resource "aws_key_pair" "keypair" {
+    key_name    = "server_key"
+    public_key  = "${local.public_key}"
   }
 `
 }
@@ -290,7 +314,7 @@ This code example with a few more improvements is located in the [Terranova exam
 
 The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp's Terraform package directly just like Terranova does it.
 
-There is an advantage of using Terranova vs using Hashicorp's Terraform directly. The Hashicorp's Terraform code change as well as their API and they are not forced to keep the contract because it's their code and what they provide is Terraform, the binary, not the internal code. So, when Hashicorp changes the code and the API, all of you using the Terraform code will have to do it too. Having a package that works as as an API to the Hashicorp Terraform code would help you to keep your code stable because other's (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.
+There is an advantage of using Terranova vs using Hashicorp's Terraform directly. The Hashicorp's Terraform code change as well as their package contract and they are not forced to keep it because it's their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.
 
 Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we'll include it.
 
