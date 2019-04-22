@@ -294,17 +294,21 @@
 <li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It&rsquo;s important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
 </ul>
 
-<p>The first step is to get and import the Terranova package:</p>
+<p>Terranova works better as a Go module, if you don&rsquo;t have a <code>go.mod</code> file in your project, create it with <code>go mod init [package full name]</code>, for example:</p>
 
-<pre><code class="language-bash">go get -u github.com/johandry/terranova
+<pre><code class="language-bash">go mod init github.com/user/myproject
 </code></pre>
 
-<pre><code class="language-go">import (
+<p>Then import Terranova in the Go code</p>
+
+<pre><code>import (
   &quot;github.com/johandry/terranova&quot;
 )
 </code></pre>
 
-<p>Then lets work on each of the needed objects.</p>
+<p>As soon as you execute a Go command such as <code>go build</code> or <code>go test</code> it will be included in your <code>go.mod</code> file , create or update the <code>go.sum</code> file and download the required packages/modules.</p>
+
+<p>If you are not using modules and still using the $GOPATH, you may have problems executing <code>go get</code>, so I&rsquo;d recommend to use a vendor manager or use <code>go mod vendor</code> to deal with the errors.</p>
 
 <h3 id="code">Code</h3>
 
