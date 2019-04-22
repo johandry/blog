@@ -23,19 +23,23 @@ There are several objects needed by Terranova and therefore by Terraform to work
 - **Variables**: The Code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.
 - **State**: This is final state of the infrastructure when the build or a change is done. It's important to keep the state in a save place to apply the further changes or destroy everything that was built.
 
-The first step is to get and import the Terranova package:
+Terranova works better as a Go module, if you don't have a `go.mod` file in your project, create it with `go mod init [package full name]`, for example: 
 
 ```bash
-go get -u github.com/johandry/terranova
+go mod init github.com/user/myproject
 ```
 
-```go
+Then import Terranova in the Go code
+
+```
 import (
   "github.com/johandry/terranova"
 )
 ```
 
-Then lets work on each of the needed objects.
+As soon as you execute a Go command such as `go build` or `go test` it will be included in your `go.mod` file , create or update the `go.sum` file and download the required packages/modules.
+
+If you are not using modules and still using the $GOPATH, you may have problems executing `go get `, so I'd recommend to use a vendor manager or use `go mod vendor` to deal with the errors.
 
 ### Code
 
