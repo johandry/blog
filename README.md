@@ -1,12 +1,12 @@
-# Johandry's Blog
+# My Blog
 
 This is the source code and content of my [blog](http://blog.johandry.com). It's built with [Hugo](https://gohugo.io/), a great framework to build static web sites.
 
 Most of the actions are automated in a Makefile, so most of the required actions are done with `make`, but everything else is documented here.
 
-The main requirement for this blog is [Hugo](https://gohugo.io/), install it executing: `brew install hugo`. 
+The main requirement for this blog is [Hugo](https://gohugo.io/), install it executing: `brew install hugo`.
 
-After clonning the repository, download (or clone) the blog theme:
+After cloning the repository, download (or clone) the blog theme:
 
 ```bash
 mkdir themes
@@ -22,7 +22,7 @@ To create a new post execute:
 make post T='Title of the Post'
 ```
 
-Then edit the file `content/post/<title-of-the-post>.md` to add the post content. Use the command  `hugo server -D` and open http://localhost:1313 to view the live changes to the new post.
+Then edit the file `content/post/<title-of-the-post>.md` to add the post content. Use the command  `hugo server -D` and go to [localhost:1313](http://localhost:1313) to view the live changes to the new post.
 
 Make sure to:
 
@@ -35,6 +35,7 @@ Once it's done, run `hugo server` to do a final validation before deploy to GitH
 git status
 git add --all
 git commit -m "Post <title>"
+git push
 ```
 
 Create a Pull Request to merge the new post branch into master branch. Finally, re-build the blog site executing:
@@ -43,7 +44,7 @@ Create a Pull Request to merge the new post branch into master branch. Finally, 
 make build push
 ```
 
-The content of the blog, is in the directory `public/` (re-created by `build`) which is where the branch `gh-pages` is (sync'd by `push`). You can also execute `make all`.
+The content of the blog, is in the directory `public/` (re-created by `build`) which is where the branch `gh-pages` is (synced by `push`). You can also execute `make all`.
 
 Verify the new post on-line.
 
