@@ -427,7 +427,7 @@ RUN apk --update add git openssh && \
     rm -rf /var/lib/apt/lists/* && \
     rm /var/cache/apk/* && \
     tar xf /upx-${UPX_VER}-amd64_linux.tar.xz && \
-    mv /upx-${UPX_VER}-amd64_linux/upx /bin/upx
+    mv upx-${UPX_VER}-amd64_linux/upx /bin/upx
 
 RUN cd /go/src/${PKG_BASE}/${PKG_NAME} && \
     go get github.com/sirupsen/logrus && \
