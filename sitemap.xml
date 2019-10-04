@@ -4,21 +4,46 @@
   
   <url>
     <loc>http://blog.johandry.com/tags/docker/</loc>
-    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/go/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/go-modules/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
   </url>
   
   <url>
     <loc>http://blog.johandry.com/tags/golang/</loc>
-    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.johandry.com/post/intro-microservice-in-go-1/</loc>
-    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
   </url>
   
   <url>
     <loc>http://blog.johandry.com/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/post/lessons-learned-about-devendorize-and-modularize-a-go-project/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/post/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/</loc>
+    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/post/intro-microservice-in-go-1/</loc>
     <lastmod>2017-11-10T14:20:08-08:00</lastmod>
   </url>
   
@@ -33,17 +58,7 @@
   </url>
   
   <url>
-    <loc>http://blog.johandry.com/post/</loc>
-    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>http://blog.johandry.com/tags/restful/</loc>
-    <lastmod>2017-11-10T14:20:08-08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.johandry.com/tags/</loc>
     <lastmod>2017-11-10T14:20:08-08:00</lastmod>
   </url>
   

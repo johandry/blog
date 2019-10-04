@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2017. All rights reserved.</copyright>
-    <lastBuildDate>Fri, 10 Nov 2017 14:20:08 -0800</lastBuildDate>
+    <lastBuildDate>Wed, 02 Oct 2019 19:26:18 -0700</lastBuildDate>
     
 	<atom:link href="http://blog.johandry.com/tags/golang/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Lessons Learned: Devendorize and Modularize a Go Project</title>
+      <link>http://blog.johandry.com/post/lessons-learned-about-devendorize-and-modularize-a-go-project/</link>
+      <pubDate>Wed, 02 Oct 2019 19:26:18 -0700</pubDate>
+      
+      <guid>http://blog.johandry.com/post/lessons-learned-about-devendorize-and-modularize-a-go-project/</guid>
+      <description>defer Conclusions()  This week I&amp;rsquo;ve been working on remove all the vendors of a massive Go project and make it use Go modules. It&amp;rsquo;s not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.
+Here are my lessons learned in the process of devendorize and modularize a Go project.</description>
+    </item>
     
     <item>
       <title>Introduction to Microservices in Go, part 1</title>
