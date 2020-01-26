@@ -4,7 +4,47 @@
   
   <url>
     <loc>http://blog.johandry.com/tags/docker/</loc>
-    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/post/free-kubernetes-clusters-for-development-and-learning/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/katacoda/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/kind/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/kubernetes/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/minikube/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/post/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.johandry.com/tags/</loc>
+    <lastmod>2020-01-26T12:55:31-08:00</lastmod>
   </url>
   
   <url>
@@ -23,22 +63,7 @@
   </url>
   
   <url>
-    <loc>http://blog.johandry.com/</loc>
-    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
-  </url>
-  
-  <url>
     <loc>http://blog.johandry.com/post/lessons-learned-about-devendorize-and-modularize-a-go-project/</loc>
-    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.johandry.com/post/</loc>
-    <lastmod>2019-10-02T19:26:18-07:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.johandry.com/tags/</loc>
     <lastmod>2019-10-02T19:26:18-07:00</lastmod>
   </url>
   

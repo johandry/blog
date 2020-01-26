@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2017. All rights reserved.</copyright>
-    <lastBuildDate>Wed, 02 Oct 2019 19:26:18 -0700</lastBuildDate>
+    <lastBuildDate>Sun, 26 Jan 2020 12:55:31 -0800</lastBuildDate>
     
 	<atom:link href="http://blog.johandry.com/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,9 +15,45 @@
     <item>
       <title>Docker</title>
       <link>http://blog.johandry.com/tags/docker/</link>
-      <pubDate>Wed, 02 Oct 2019 19:26:18 -0700</pubDate>
+      <pubDate>Sun, 26 Jan 2020 12:55:31 -0800</pubDate>
       
       <guid>http://blog.johandry.com/tags/docker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Katacoda</title>
+      <link>http://blog.johandry.com/tags/katacoda/</link>
+      <pubDate>Sun, 26 Jan 2020 12:55:31 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/tags/katacoda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>KinD</title>
+      <link>http://blog.johandry.com/tags/kind/</link>
+      <pubDate>Sun, 26 Jan 2020 12:55:31 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/tags/kind/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kubernetes</title>
+      <link>http://blog.johandry.com/tags/kubernetes/</link>
+      <pubDate>Sun, 26 Jan 2020 12:55:31 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Minikube</title>
+      <link>http://blog.johandry.com/tags/minikube/</link>
+      <pubDate>Sun, 26 Jan 2020 12:55:31 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/tags/minikube/</guid>
       <description></description>
     </item>
     
