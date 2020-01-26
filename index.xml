@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Johandry&#39;s Blog</title>
@@ -18,7 +18,7 @@
       <pubDate>Wed, 02 Oct 2019 19:26:18 -0700</pubDate>
       
       <guid>http://blog.johandry.com/post/lessons-learned-about-devendorize-and-modularize-a-go-project/</guid>
-      <description>defer Conclusions()  This week I&amp;rsquo;ve been working on remove all the vendors of a massive Go project and make it use Go modules. It&amp;rsquo;s not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.
+      <description>defer Conclusions() This week I&#39;ve been working on remove all the vendors of a massive Go project and make it use Go modules. It&#39;s not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.
 Here are my lessons learned in the process of devendorize and modularize a Go project.</description>
     </item>
     
@@ -28,9 +28,9 @@ Here are my lessons learned in the process of devendorize and modularize a Go pr
       <pubDate>Fri, 10 Nov 2017 14:20:08 -0800</pubDate>
       
       <guid>http://blog.johandry.com/post/intro-microservice-in-go-1/</guid>
-      <description>This is a very simple example about how to build a microservice in Go. It&amp;rsquo;s meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
+      <description>This is a very simple example about how to build a microservice in Go. It&#39;s meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.
 The purpose of this microservice is a catalog of movies. The code is at https://github.com/johandry/micro-media-service and every section is a branch, clone the repo and change branch for every section.
-git clone https://github.com/johandry/micro-media-service  A simple RESTful API Let&amp;rsquo;s start with a simple RESTfull API by making a simple web server.</description>
+git clone https://github.com/johandry/micro-media-service  A simple RESTful API Let&#39;s start with a simple RESTfull API by making a simple web server.</description>
     </item>
     
     <item>
@@ -48,9 +48,9 @@ git clone https://github.com/johandry/micro-media-service  A simple RESTful API 
       <pubDate>Sat, 28 Oct 2017 23:42:14 -0700</pubDate>
       
       <guid>http://blog.johandry.com/post/a-new-blog-on-github/</guid>
-      <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&amp;rsquo;t have to do it again but may help others to do the same.
-You&amp;rsquo;ll need Hugo and Git. Once you have Hugo, create the blog with:
-brew install hugo hugo new site blog cd blog git init  The next step is to choose a theme, which took me a long time.</description>
+      <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&#39;t have to do it again but may help others to do the same.
+You&#39;ll need Hugo and Git. Once you have Hugo, create the blog with:
+brew install hugo hugo new site blog cd blog git init The next step is to choose a theme, which took me a long time. Go to https://themes.</description>
     </item>
     
     <item>
@@ -61,7 +61,7 @@ brew install hugo hugo new site blog cd blog git init  The next step is to choos
       <guid>http://blog.johandry.com/post/first-post/</guid>
       <description>Is it?
 Nah! I think this is my 3rd attempt to start a blog. I started with johandry.blogspot.com then I started a cool project with PerlDancer and created this other blog perlondancer.blogspot.com. Also, there were a couple of failed attempts with WordPress.com.
-I&amp;rsquo;ll continue posting, I have some ideas and projects that I have in my Github. Most of them related to Go and DevOps.
+I&#39;ll continue posting, I have some ideas and projects that I have in my Github. Most of them related to Go and DevOps.
 Stay tuned!</description>
     </item>
     

@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.58.3" />
+  <meta name="generator" content="Hugo 0.61.0" />
 
   <title>Lessons Learned: Devendorize and Modularize a Go Project &middot; Johandry&#39;s Blog</title>
 
@@ -274,363 +274,198 @@
 
 </div>
 
-  
-
-<pre><code class="language-go">defer Conclusions()
-</code></pre>
-
-<p>This week I&rsquo;ve been working on remove all the vendors of a massive Go project and make it use Go modules. It&rsquo;s not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.</p>
-
+  <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">Conclusions</span>()
+</code></pre></div><p>This week I've been working on remove all the vendors of a massive Go project and make it use Go modules. It's not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.</p>
 <p>Here are my lessons learned in the process of devendorize and modularize a Go project.</p>
-
 <h2 id="1-get-a-backup-of-your-vendor-directory">1. Get a backup of your vendor directory</h2>
-
-<p>The first step to devendorize is to remove the vendor directory after taking a backup of it, do not get rid of it, you may need it later if things goes wrong and things can go wrong very easily. Go modules are great and good for your projects but it&rsquo;s not completely mature yet. So, I suggest to take a backup of your precious vendors.</p>
-
-<pre><code class="language-bash">mv ./vendor/ /some/where/else/
-</code></pre>
-
-<h2 id="2-use-a-clean-environment">2. Use a clean environment</h2>
-
-<p>This is a very important step. Your code may compile due to packages or modules already in your development environment. It&rsquo;s important to get rid of them to make sure that your code is going to compile  in your environment and the environment of other developers or contributors.</p>
-
+<p>The first step to devendorize is to remove the vendor directory after taking a backup of it, do not get rid of it, you may need it later if things goes wrong and things can go wrong very easily. Go modules are great and good for your projects but it's not completely mature yet. So, I suggest to take a backup of your precious vendors.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mv ./vendor/ /some/where/else/
+</code></pre></div><h2 id="2-use-a-clean-environment">2. Use a clean environment</h2>
+<p>This is a very important step. Your code may compile due to packages or modules already in your development environment. It's important to get rid of them to make sure that your code is going to compile  in your environment and the environment of other developers or contributors.</p>
 <p>There are different ways to use or get a clean environment to work with modules:</p>
-
-<h3 id="2-1-remove-your-packages-and-modules">2.1 Remove your packages and modules</h3>
-
+<h3 id="21-remove-your-packages-and-modules">2.1 Remove your packages and modules</h3>
 <p>This is an action that I recommend you do very carefully or you may be deleting your own code or version of packages that you want to keep in your computer.</p>
-
 <p>First is to clean the modules. This can be done with:</p>
-
-<pre><code class="language-bash">go clean -modcache
-</code></pre>
-
-<p>It will erase most of the content in <code>$GOPATH/pkg/</code>. It is not recommend to delete this directory using <code>rm</code>, instead clean the mod cache and if you want it shinny then use <code>rm</code>, but to clean the mod cache is good enough.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go clean -modcache
+</code></pre></div><p>It will erase most of the content in <code>$GOPATH/pkg/</code>. It is not recommend to delete this directory using <code>rm</code>, instead clean the mod cache and if you want it shinny then use <code>rm</code>, but to clean the mod cache is good enough.</p>
 <p>Then delete all your packages downloaded in the pre-modules time, those that <code>go get</code> downloaded to <code>$GOPATH/src</code>. Now, this part has to be done carefully.</p>
-
 <p>Most of the time I have my code in the <code>$GOPATH/src</code> directory, for example, this blog is in <code>$GOPATH/src/github.com/johandry/blog</code>. If this is a practice that you follow I recommend to delete every directory one by one, carefully, unless you have it all in sync with your CVS (i.e. Github).</p>
-
-<h3 id="2-2-use-a-different-gopath">2.2 Use a different GOPATH</h3>
-
-<p>This may be the quicker way to have a clean environment but it&rsquo;s just temporal, so use it when you want to prove something really quick and don&rsquo;t want to modify your dev environment.</p>
-
+<h3 id="22-use-a-different-gopath">2.2 Use a different GOPATH</h3>
+<p>This may be the quicker way to have a clean environment but it's just temporal, so use it when you want to prove something really quick and don't want to modify your dev environment.</p>
 <p>Define a new GOPATH variable pointing to a temporal directory. All you do after exporting the new GOPATH is isolated from your regular Go development environment. However it is not 100% isolated, you may have  environment variables or files that cause some noice.</p>
-
-<pre><code class="language-bash">export GOPATH=$(mktemp -d)
-</code></pre>
-
-<p>This is going to create a temporal directory and assign GOPATH to it. Everything you do after this line, in the same shell session, will happen in this directory. So, new modules, new packages, new binaries will be there.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export GOPATH<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>mktemp -d<span style="color:#66d9ef">)</span>
+</code></pre></div><p>This is going to create a temporal directory and assign GOPATH to it. Everything you do after this line, in the same shell session, will happen in this directory. So, new modules, new packages, new binaries will be there.</p>
 <p>When you are done with your test, you can delete everything or wait for the system remove it in your next reboot.</p>
-
-<pre><code class="language-bash">echo $GOPATH        # make sure you are using a temporal one
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">echo $GOPATH        <span style="color:#75715e"># make sure you are using a temporal one</span>
 go clean -modcache
 rm -rf $GOPATH
-</code></pre>
-
-<h3 id="2-3-using-docker">2.3 Using Docker</h3>
-
-<p>This may be the best way to isolate a development environment, it&rsquo;s 100% isolated, reproducible and you can share it with your co-workers and contributors.</p>
-
+</code></pre></div><h3 id="23-using-docker">2.3 Using Docker</h3>
+<p>This may be the best way to isolate a development environment, it's 100% isolated, reproducible and you can share it with your co-workers and contributors.</p>
 <p>This is an example of a Dockerfile used to get the modules and build the application:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Base image to load all the dependencies and modules</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang AS base</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> GO111MODULE<span style="color:#f92672">=</span>on
 
-<pre><code class="language-dockerfile"># Base image to load all the dependencies and modules
-FROM golang AS base
-
-ENV GO111MODULE=on
-
-WORKDIR /workspace/simple
-
-COPY go.mod .
-COPY go.sum .
-RUN  go mod download
-
-# -----------------------------------------------
-# Base image for development and test the build
-# Use it with `build --target=builder-dev`
-FROM base AS builder-dev
-
-ENTRYPOINT [ &quot;bash&quot; ]
-
-# -----------------------------------------------
-# Image to build the application
-FROM base AS builder
-
-WORKDIR /workspace/simple
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /simple 
-
-# -----------------------------------------------
-# Application image used for development and test
-# Use it with `build --target=app-dev`
-FROM alpine:3.9 AS app-dev
-
-COPY --from=builder /simple /app/bin/
-ENTRYPOINT [ &quot;ash&quot; ]
-
-# -----------------------------------------------
-# Application image, use it with `build --target=app`
-FROM alpine:3.9 AS app
-
-COPY --from=builder /simple /app/bin/
-ENTRYPOINT [ &quot;/app/bin/simple&quot; ]
-</code></pre>
-
-<p>As you can see this Dockerfile uses multiple stages. A multi-stages Dockerfile is a very useful pattern to keep your Docker containers small, make it modular and speed up your build process. If you need more information about Dockerfiles with multiple stages I recommend reading <a href="https://docs.docker.com/develop/develop-images/multistage-build/">this article</a> and other about <a href="https://medium.com/@tonistiigi/advanced-multi-stage-build-patterns-6f741b852fae">design patterns</a>.</p>
-
+<span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /workspace/simple</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> go.mod .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> go.sum .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span>  go mod download<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># -----------------------------------------------</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Base image for development and test the build</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Use it with `build --target=builder-dev`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> base AS builder-dev</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;bash&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># -----------------------------------------------</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Image to build the application</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> base AS builder</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /workspace/simple</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> . .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> CGO_ENABLED<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> GOOS<span style="color:#f92672">=</span>linux GOARCH<span style="color:#f92672">=</span>amd64 go build -o /simple <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># -----------------------------------------------</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Application image used for development and test</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Use it with `build --target=app-dev`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine:3.9 AS app-dev</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>builder /simple /app/bin/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;ash&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># -----------------------------------------------</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#75715e"># Application image, use it with `build --target=app`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> alpine:3.9 AS app</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>builder /simple /app/bin/<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;/app/bin/simple&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>As you can see this Dockerfile uses multiple stages. A multi-stages Dockerfile is a very useful pattern to keep your Docker containers small, make it modular and speed up your build process. If you need more information about Dockerfiles with multiple stages I recommend reading <a href="https://docs.docker.com/develop/develop-images/multistage-build/">this article</a> and other about <a href="https://medium.com/@tonistiigi/advanced-multi-stage-build-patterns-6f741b852fae">design patterns</a>.</p>
 <p>In this Dockerfile are 5 stages, the first one (<code>base</code>) contain all the requirements to build the application. These requirements are Go, the Go tools and the modules the application needs. There may be other requirements such as certificates or internal modules/packages (those that are private to your company and are not in Github, for example).</p>
-
 <p>The base stage begins defining all the environment variables required to build or get the modules, in this example, the variable <code>GO111MODULE=on</code> defines that we will be using Go modules.</p>
-
 <p>After defining the working directory to store the entire source code of your application (i.e. <code>/workspace/&lt;app_name&gt;</code>) we copy into this directory the files <code>go.mod</code> and <code>go.sum</code>. These files contain all the information about the required modules. Then, we proceed to download all the packages/modules listed in <code>go.sum</code> using <code>go mod download</code> and they will be downloaded in <code>$GOPATH/pkg/mod/</code>.</p>
-
 <p>In the next phase we copy all the Go source code into the image. So you may ask, why get the modules first and then the code?</p>
-
 <p>Copying the <code>go.[mod|sum]</code> files and downloading the modules/packages makes Docker to create an image layer for each <code>COPY</code> directive. If one of these file changes Docker will recreate this image layer, meaning that will download the modules again but if the files do not change Docker will reuse these image layers, including the one with the modules, speeding up the process to build the application.</p>
-
 <p>There are other technics to do besides downloading the modules from the <code>go.[mod|sum]</code> files. For example, get the modules into the <code>./vendor/</code> directory using <code>go mod vendor</code>. This option requires to use the flag <code>-mod=vendor</code> to build the application.</p>
-
 <p>The stage <code>builder-dev</code> is used to debug the building process. Assuming something is not working downloading the modules or building the application, you can specify to Docker to stop when the <code>builder-dev</code> stage is complete. Then you can login into the container and execute the process manually or do whatever you need to debug the problem. Example:</p>
-
-<pre><code class="language-bash">$ docker build -t simple-builder-dev --target=builder-dev .
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker build -t simple-builder-dev --target<span style="color:#f92672">=</span>builder-dev .
 $ docker run --rm -it simple-builder-dev
 # 
-</code></pre>
-
-<p>If needed, comment out the line with <code>go mod download</code> to debug the process and find the cause of the errors.</p>
-
+</code></pre></div><p>If needed, comment out the line with <code>go mod download</code> to debug the process and find the cause of the errors.</p>
 <p>The <code>builder</code> stage is used to copy all the Go source code and build the application. The binary will be stored in the root directory <code>/</code>.</p>
-
 <p>If you set the environment variable <code>DOCKER_BUILDKIT=1</code> Docker will build in parallel the stages that depend from the same stage, speeding up the process even more.</p>
-
 <p>The last two stages are to store the binary into a container with <code>alpine</code> and the difference is that <code>app-dev</code> is used to login into the application container for testing or development purposes, while <code>app</code> is only to execute or use the application.</p>
-
 <p>To get the application image just need to execute:</p>
-
-<pre><code class="language-bash">docker build -t simple .
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t simple .
 docker run --rm -it simple
-</code></pre>
-
-<p>If something is wrong with your modules the process will stop in the first stage.</p>
-
+</code></pre></div><p>If something is wrong with your modules the process will stop in the first stage.</p>
 <p>Keep reading to know what else you can do in this Dockerfile.</p>
-
 <h2 id="3-initialize-the-modules">3. Initialize the modules</h2>
-
 <p>This is not new, you can read all about this in any article about Go modules. If you need more information go to the article <a href="https://blog.golang.org/using-go-modules">Using Go Modules</a> from The Go Blog.</p>
-
-<pre><code class="language-bash">go mod init github.com/myuser/projectname
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod init github.com/myuser/projectname
 go mod tidy
-</code></pre>
-
-<p>This will create the <code>go.mod</code> file and populate it with all the modules you are using. In this process, it will also download all the used modules and create the <code>go.sum</code> file.</p>
-
+</code></pre></div><p>This will create the <code>go.mod</code> file and populate it with all the modules you are using. In this process, it will also download all the used modules and create the <code>go.sum</code> file.</p>
 <p>These 2 files (<code>go.[mod|sum]</code>) contain all the information about the required modules, like the version to download.</p>
-
 <p>The <code>go.mod</code> file is the one we are going to modify (manually or with Go tools) and it has 2 important sections or directives: <code>require</code> and <code>replace</code>.</p>
-
 <p>The section or directive <code>require</code> is usually generated automatically and list all the modules and the version required by the application.</p>
-
-<p>The section or directive <code>replace</code> is usually added manually and it&rsquo;s used to modify the module parameters (name, path or version) before download it.</p>
-
+<p>The section or directive <code>replace</code> is usually added manually and it's used to modify the module parameters (name, path or version) before download it.</p>
 <h2 id="4-update-the-modules-list">4. Update the modules list</h2>
-
 <p>One of the daily activities with modules is to update the list. To do this, use the command:</p>
-
-<pre><code class="language-bash">go mod tidy
-</code></pre>
-
-<p>Use the  <code>go mod tidy</code> command when you import a new package so it will be inserted in the <code>go.mod</code> file and this will also remove all the modules/packages that are not in use. It&rsquo;s important to execute <code>go mod tidy</code> after every modification to the <code>go.mod</code> file.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod tidy
+</code></pre></div><p>Use the  <code>go mod tidy</code> command when you import a new package so it will be inserted in the <code>go.mod</code> file and this will also remove all the modules/packages that are not in use. It's important to execute <code>go mod tidy</code> after every modification to the <code>go.mod</code> file.</p>
 <p>You can also list all the used modules and its dependencies with:</p>
-
-<pre><code class="language-bash">go list -m all
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go list -m all
 go list -m -versions &lt;module&gt;
-</code></pre>
-
-<p>To know why a module is required, use <code>go mod why</code> and it will show the shortest path from a package to the questionable package. Example:</p>
-
-<pre><code class="language-bash">go mod why google.golang.org/grpc
-# google.golang.org/grpc
+</code></pre></div><p>To know why a module is required, use <code>go mod why</code> and it will show the shortest path from a package to the questionable package. Example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod why google.golang.org/grpc
+<span style="color:#75715e"># google.golang.org/grpc</span>
 github.com/johandry/terranova-examples/aws/simple
 github.com/terraform-providers/terraform-provider-aws/aws
 github.com/hashicorp/terraform/helper/resource
 google.golang.org/grpc
-</code></pre>
-
-<p>And recently was introduced <code>go mod graph</code> to generate the modules relationships and that can be used to visualize the modules dependencies. Example:</p>
-
-<pre><code class="language-bash"># require `dot` which is included in `graphviz` and requires `modgraphviz`
+</code></pre></div><p>And recently was introduced <code>go mod graph</code> to generate the modules relationships and that can be used to visualize the modules dependencies. Example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># require `dot` which is included in `graphviz` and requires `modgraphviz`</span>
 brew install graphviz
 go install golang.org/x/exp/cmd/modgraphviz
 
 go mod graph | modgraphviz &gt; graph.dot
 go mod graph | modgraphviz | dot -Tpng -o graph.png
 open graph.png
-</code></pre>
-
-<p>But I think mod graphs are not mature yet and there will be more the near future. To know more about mod graphs read <a href="https://github.com/go-modules-by-example/index/tree/master/014_mod_graph">here</a> and <a href="https://github.com/go-modules-by-example/index/tree/master/018_go_list_mod_graph_why">here</a>.</p>
-
+</code></pre></div><p>But I think mod graphs are not mature yet and there will be more the near future. To know more about mod graphs read <a href="https://github.com/go-modules-by-example/index/tree/master/014_mod_graph">here</a> and <a href="https://github.com/go-modules-by-example/index/tree/master/018_go_list_mod_graph_why">here</a>.</p>
 <h2 id="5-the-sirupsen-headache">5. The Sirupsen headache</h2>
-
 <p>The package <code>github.com/sirupsen/logrus</code> is a logger widely used but originally the name was <code>Sirupsen/logrus</code> (uppercase S) and when it was renamed to <code>sirupsen/logrus</code> that caused a lot of problems among all the Go developers and many headaches.</p>
-
 <p>There are still some packages that use the original name or an old version of <code>sirupsen/logrus</code> that cause some conflicts with modules.</p>
-
 <p>The solution to these conflicts is to add the following replace directive, however there are other solutions documented, if this solution does not work search for the different ways to solve this.</p>
-
-<pre><code class="language-go">replace github.com/Sirupsen/logrus =&gt; github.com/sirupsen/logrus v1.2.0
-</code></pre>
-
-<p>Or execute:</p>
-
-<pre><code class="language-bash">go mod edit -replace github.com/Sirupsen/logrus=github.com/sirupsen/logrus@v1.2.0
-</code></pre>
-
-<p>Why version <code>v1.2.0</code>? Well, any version higher that <code>v1.0.0</code> would work, and that&rsquo;s because this was the first release using the lowercase. If version <code>v1.2.0</code> cause conflicts, then try a different one higher than <code>v1.0.0</code>. Check it out in the <a href="https://github.com/sirupsen/logrus/blob/v1.2.0/CHANGELOG.md#100">changelog</a>.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">replace</span> <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">Sirupsen</span><span style="color:#f92672">/</span><span style="color:#a6e22e">logrus</span> =&gt; <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">sirupsen</span><span style="color:#f92672">/</span><span style="color:#a6e22e">logrus</span> <span style="color:#a6e22e">v1</span><span style="color:#ae81ff">.2</span><span style="color:#ae81ff">.0</span>
+</code></pre></div><p>Or execute:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod edit -replace github.com/Sirupsen/logrus<span style="color:#f92672">=</span>github.com/sirupsen/logrus@v1.2.0
+</code></pre></div><p>Why version <code>v1.2.0</code>? Well, any version higher that <code>v1.0.0</code> would work, and that's because this was the first release using the lowercase. If version <code>v1.2.0</code> cause conflicts, then try a different one higher than <code>v1.0.0</code>. Check it out in the <a href="https://github.com/sirupsen/logrus/blob/v1.2.0/CHANGELOG.md#100">changelog</a>.</p>
 <p>As mentioned before, run <code>go mod tidy</code> to cleanup, update, generate the <code>go.sum</code> and download the modules.</p>
-
 <h2 id="6-find-the-right-version">6. Find the right version</h2>
-
-<p>Some errors are caused by using the lates and/or incorrect version of a module. To identify this situation you need to analyze the build logs. Let&rsquo;s see a couple of examples:</p>
-
+<p>Some errors are caused by using the lates and/or incorrect version of a module. To identify this situation you need to analyze the build logs. Let's see a couple of examples:</p>
 <p>My code is using the latest version of Kubernetes so instead of using version <code>v1.16</code>, this caused the compilation error:</p>
-
-<pre><code class="language-bash">does not contain package k8s.io/kubernetes/pkg/kubectl/validation
-</code></pre>
-
-<p>This was fixed switching to version <code>v1.15</code> by adding to the <code>require</code> section the line <code>k8s.io/kubernetes v1.15.0</code> or executing:</p>
-
-<pre><code class="language-bash">go mod edit -require k8s.io/kubernetes@v1.15.0
-</code></pre>
-
-<p>Other compilation error state something similar because is using the latest version of Terraform (<code>v0.12.9</code>) but I know my code uses the version <code>v0.11.14</code>.</p>
-
-<pre><code class="language-bash">module github.com/hashicorp/terraform@latest (v0.12.9) found, but does not contain package github.com/hashicorp/terraform/config/module
-</code></pre>
-
-<p>So I replace it with the correct version adding this line to the <code>replace</code> section:</p>
-
-<pre><code class="language-go">github.com/hashicorp/terraform =&gt; github.com/hashicorp/terraform v0.11.14
-</code></pre>
-
-<h2 id="7-use-the-commit-hash">7. Use the commit hash</h2>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">does not contain package k8s.io/kubernetes/pkg/kubectl/validation
+</code></pre></div><p>This was fixed switching to version <code>v1.15</code> by adding to the <code>require</code> section the line <code>k8s.io/kubernetes v1.15.0</code> or executing:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod edit -require k8s.io/kubernetes@v1.15.0
+</code></pre></div><p>Other compilation error state something similar because is using the latest version of Terraform (<code>v0.12.9</code>) but I know my code uses the version <code>v0.11.14</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">module github.com/hashicorp/terraform@latest <span style="color:#f92672">(</span>v0.12.9<span style="color:#f92672">)</span> found, but does not contain package github.com/hashicorp/terraform/config/module
+</code></pre></div><p>So I replace it with the correct version adding this line to the <code>replace</code> section:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">hashicorp</span><span style="color:#f92672">/</span><span style="color:#a6e22e">terraform</span> =&gt; <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">hashicorp</span><span style="color:#f92672">/</span><span style="color:#a6e22e">terraform</span> <span style="color:#a6e22e">v0</span><span style="color:#ae81ff">.11</span><span style="color:#ae81ff">.14</span>
+</code></pre></div><h2 id="7-use-the-commit-hash">7. Use the commit hash</h2>
 <p>Sometimes the version number is not easy to identify or not possible at all. In such cases try to find the last commit hash for the given tag, release, or pull request with the package version you need.</p>
-
-<p>For example, Kubernetes uses to replace the package path with a path inside the repository, so it&rsquo;s not possible to find the version number. Go to the repository of this package, locate the tag or release used by the Kubernetes version you need and locate the commit hash number in the right upper corner. It&rsquo;s better if you get the entire hash number.</p>
-
+<p>For example, Kubernetes uses to replace the package path with a path inside the repository, so it's not possible to find the version number. Go to the repository of this package, locate the tag or release used by the Kubernetes version you need and locate the commit hash number in the right upper corner. It's better if you get the entire hash number.</p>
 <p>With the hash number add into the replace section the line: <code>&lt;module name&gt;[@version] =&gt; &lt;module name&gt; &lt;hash number&gt;</code>. For example:</p>
-
-<pre><code class="language-go">k8s.io/api =&gt; k8s.io/api 7cf5895f2711098d7d9527db0a4a49fb0dff7de2
-</code></pre>
-
-<p>After executing <code>go mod tidy</code> the hash will be replaced by <code>v0.0.0-20190620084959-7cf5895f2711</code> getting  this:</p>
-
-<pre><code class="language-go">k8s.io/api =&gt; k8s.io/api v0.0.0-20190620084959-7cf5895f2711
-</code></pre>
-
-<p>Use this method of using the commit hash as much as possible and every time you cannot find the right version number, <code>go mod</code> will try to identify the correct version number or something similar.</p>
-
-<h2 id="8-read-the-go-mod-of-the-package">8. Read the <code>go.mod</code> of the package</h2>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> =&gt; <span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> <span style="color:#ae81ff">7</span><span style="color:#a6e22e">cf5895f2711098d7d9527db0a4a49fb0dff7de2</span>
+</code></pre></div><p>After executing <code>go mod tidy</code> the hash will be replaced by <code>v0.0.0-20190620084959-7cf5895f2711</code> getting  this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> =&gt; <span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> <span style="color:#a6e22e">v0</span><span style="color:#ae81ff">.0</span><span style="color:#ae81ff">.0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">20190620084959</span><span style="color:#f92672">-</span><span style="color:#ae81ff">7</span><span style="color:#a6e22e">cf5895f2711</span>
+</code></pre></div><p>Use this method of using the commit hash as much as possible and every time you cannot find the right version number, <code>go mod</code> will try to identify the correct version number or something similar.</p>
+<h2 id="8-read-the-gomod-of-the-package">8. Read the <code>go.mod</code> of the package</h2>
 <p>During the execution of the previous step you may found a <code>go.mod</code> file, you can get advantage of this file to identify the version of the required modules.</p>
-
 <p>For example, identifying the commit hash for <code>k8s.io/cli-runtime</code> I found in the <code>go.mod</code> file the module <code>k8s.io/client-go</code>. This module is also required, so use the module version and include the same line from the <code>require</code> or <code>replace</code> section into my <code>go.mod</code> file.</p>
-
 <h2 id="9-private-modules">9. Private modules</h2>
-
 <p>Private modules are those modules that are in a GitHub Enterprise and are not available to everyone. If you have those then use the environment variable <code>GOPRIVATE</code>. For example, if my company name is acme.com then export the environment variable is like this:</p>
-
-<pre><code class="language-bash">export GOPRIVATE=*.acme.com
-</code></pre>
-
-<p>In the Dockerfile use it like this:</p>
-
-<pre><code class="language-dockerfile">ENV     GOPRIVATE=*.acme.com
-</code></pre>
-
-<p>There is other option you can do&hellip;</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export GOPRIVATE<span style="color:#f92672">=</span>*.acme.com
+</code></pre></div><p>In the Dockerfile use it like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">ENV</span>     GOPRIVATE<span style="color:#f92672">=</span>*.acme.com<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>There is other option you can do&hellip;</p>
 <h2 id="10-keep-private-modules-in-the-repo">10. Keep private modules in the repo</h2>
-
 <p>Other option with private modules is to keep them in the repository, you can use the <code>./vendor/</code> directory for this. Then include the following line in the <code>replace</code> section of your <code>go.mod</code> file:</p>
-
-<pre><code class="language-go">github.acme.com/kraken/azure =&gt; ./vendor/github.acme.com/kraken/azure
-</code></pre>
-
-<p>This replace directive will use modules that are in the repository or outside of it, the path could be absolute or relative to the <code>go.mod</code> file.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span> =&gt; .<span style="color:#f92672">/</span><span style="color:#a6e22e">vendor</span><span style="color:#f92672">/</span><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span>
+</code></pre></div><p>This replace directive will use modules that are in the repository or outside of it, the path could be absolute or relative to the <code>go.mod</code> file.</p>
 <p>As you have already figure it out, this can be used for other purpose &hellip;</p>
-
-<h2 id="11-developing-testing-local-modules">11. Developing/testing local modules</h2>
-
-<p>If it is possible to replace a module path for a local directory, then this can be used to reference local modules that I&rsquo;m developing or testing or verifying some modification.</p>
-
+<h2 id="11-developingtesting-local-modules">11. Developing/testing local modules</h2>
+<p>If it is possible to replace a module path for a local directory, then this can be used to reference local modules that I'm developing or testing or verifying some modification.</p>
 <p>So, clone the repository of the module you are working either in the same parent directory of your repo or in an internal directory of your repo (i.e. <code>./internal/</code> or <code>../../foo/</code>), make sure you create all the directories that are in the package name and add a line like the following, assuming the <code>go.mod</code> file is in <code>github.acme.com/kraken/app/go.mod</code>.</p>
-
-<pre><code class="language-go">github.acme.com/kraken/azure =&gt; ./internal/github.acme.com/kraken/azure
-github.acme.com/foo/aws =&gt; ../../foo/aws
-github.com/bar/gcp =&gt; ../../../github.com/bar/gcp
-</code></pre>
-
-<h2 id="12-error-reading-url-410-gone">12. Error <code>reading &lt;URL&gt;: 410 Gone</code></h2>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span> =&gt; .<span style="color:#f92672">/</span><span style="color:#a6e22e">internal</span><span style="color:#f92672">/</span><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span>
+<span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">foo</span><span style="color:#f92672">/</span><span style="color:#a6e22e">aws</span> =&gt; ..<span style="color:#f92672">/</span>..<span style="color:#f92672">/</span><span style="color:#a6e22e">foo</span><span style="color:#f92672">/</span><span style="color:#a6e22e">aws</span>
+<span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">bar</span><span style="color:#f92672">/</span><span style="color:#a6e22e">gcp</span> =&gt; ..<span style="color:#f92672">/</span>..<span style="color:#f92672">/</span>..<span style="color:#f92672">/</span><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">bar</span><span style="color:#f92672">/</span><span style="color:#a6e22e">gcp</span>
+</code></pre></div><h2 id="12-error-reading-url-410-gone">12. Error <code>reading &lt;URL&gt;: 410 Gone</code></h2>
 <p>This error happens when the <code>go mod</code> cannot get the module/package from the go modules proxy or the CVS (i.e. GitHub). To eliminate this error, use the environment variable <code>GONOSUMDB</code>. This situation is also common with private modules, so using the previous example export the environment variable like this:</p>
-
-<pre><code class="language-bash">export GONOSUMDB=github.acme.com/kraken
-</code></pre>
-
-<p>Using other example, use the <code>GONOSUMDB</code> in a Dockerfile like this:</p>
-
-<pre><code class="language-dockerfile">ENV     GONOSUMDB=github.com/terraform-providers/terraform-provider-aws
-</code></pre>
-
-<p>If there are more than one modules in this situation separate them with comma, for example:</p>
-
-<pre><code class="language-bash">GONOSUMDB=github.acme.com/kraken,github.com/terraform-providers/terraform-provider-aws
-</code></pre>
-
-<h2 id="13-fork-and-fix">13. Fork and fix</h2>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export GONOSUMDB<span style="color:#f92672">=</span>github.acme.com/kraken
+</code></pre></div><p>Using other example, use the <code>GONOSUMDB</code> in a Dockerfile like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">ENV</span>     GONOSUMDB<span style="color:#f92672">=</span>github.com/terraform-providers/terraform-provider-aws<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>If there are more than one modules in this situation separate them with comma, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">GONOSUMDB<span style="color:#f92672">=</span>github.acme.com/kraken,github.com/terraform-providers/terraform-provider-aws
+</code></pre></div><h2 id="13-fork-and-fix">13. Fork and fix</h2>
 <p>This is rare scenario but it happens.</p>
-
 <p>Remember the Sirupsen headache problem? Well, there are some package that their contributors or owners forgot to maintain and fix, this is the case of <code>github.com/vmware/vic</code>.</p>
-
 <p>This package still uses <code>Sirupsen/logrus</code> so as a Good Samaritan an contributor to open source and Go community, you fork that repository, apply the fix and wait for your pull request to be merge. Meanwhile (and this can take an eternity), you have to replace that module path for your forked module. So, I added this line to the <code>replace</code> section:</p>
-
 <pre><code>github.com/vmware/vic =&gt; github.com/pokstad/vic v1.5.1-alpha
-</code></pre>
-
-<h2 id="14-repeat-and-compare">14. Repeat and compare</h2>
-
+</code></pre><h2 id="14-repeat-and-compare">14. Repeat and compare</h2>
 <p>To me this sounds stupid but while I was writing this article I remove all the vendors and module files (after taking a backup of course) and repeat the entire process of modularize my project. Turns out that I got a different <code>go.mod</code>. This may be (if you do it weeks or months later) because the Go tooling was improved or some modules were improved too. Or just because I followed a different path, maybe I selected a different version for a module that required different versions of other modules and so on.</p>
-
 <p>Anyways, now with multiple versions of modules I can compare them and choose the best according to my needs.</p>
-
-<p>So, bottom line, you won&rsquo;t get the same results always modularizing your Go project. And,</p>
-
+<p>So, bottom line, you won't get the same results always modularizing your Go project. And,</p>
 <h2 id="is-devendoring-really-necessary">Is devendoring really necessary?</h2>
-
 <p>Now you move everything into modules and you can remove the <code>./vendor/</code> directory but, is this always really necessary?</p>
-
 <p>No, there are projects that use modules and still have the <code>./vendor/</code> directory. This may be have a full control of all the dependencies to avoid a malicious changes, or to make the build process easier or more stable, or because they do not care about the size of the repository. Whatever may be your reason, it is not a bad practice, <strong>yet</strong>.</p>
-
 <p>However, you should migrate to modules and use <code>go mod</code> as your vendor or dependencies manager. So, to get the vendors in the <code>./vendor</code> directory execute:</p>
-
-<pre><code class="language-bash">go mod vendor
-</code></pre>
-
-<p>You can also use <code>go mod vendor</code> in the Dockerfile, however I think the process explained above is much better because Docker creates an image layer with the modules and the next <code>docker build</code> will be faster because it will reuse that layer.</p>
-
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod vendor
+</code></pre></div><p>You can also use <code>go mod vendor</code> in the Dockerfile, however I think the process explained above is much better because Docker creates an image layer with the modules and the next <code>docker build</code> will be faster because it will reuse that layer.</p>
 <p>Last but not least, when you use vendors, you have to use the flag <code>-mod=vendor</code> to build the application or to indicate to other Go tool that you are using vendors.</p>
-
 <h2 id="conclusion"><code>Conclusion()</code></h2>
-
 <p>To migrate your Go project to modules is nowadays a very good move to do. There are some tips and good practices you should consider in the process:</p>
-
 <ol>
 <li>Get a backup</li>
 <li>Use a clean environment either by using a temporal GOPATH or using a Docker container</li>
@@ -638,24 +473,20 @@ github.com/bar/gcp =&gt; ../../../github.com/bar/gcp
 <li>Update your modules files periodically and during the process using <code>go mod tidy</code>.</li>
 <li>Pay attention to <code>sirupsen/logrus</code> packages</li>
 <li>Requires patience and experience to find the right module version. Search online for the solution or go directly into the code of the modules to identify it.</li>
-<li>Don&rsquo;t be afraid to use the commit hash numbers, it&rsquo;s a good option to let <code>go mod</code> identify the right version for you.</li>
+<li>Don't be afraid to use the commit hash numbers, it's a good option to let <code>go mod</code> identify the right version for you.</li>
 <li>Use other <code>go.mod</code> files to find the right package version</li>
 <li>Use <code>GOPRIVATE</code> when you have corporate or private modules</li>
 <li>Use <code>replace</code> to a local module when you are developing or testing a module</li>
 <li>Use <code>GONOSUMDB</code> when there is a <code>410 Gone</code> error</li>
 <li>Repeat and compare. Not all the processes to modularize a Go project lead to the same solution. You may get better results if you do it a second time.</li>
 </ol>
-
 <p>Evaluate the pros and cons of devendorizing your Go project, there may be good reasons to keep the <code>./vendor</code> directory in your git repo, or not.</p>
-
 <p>When you are done, there is a few activities to consider:</p>
-
 <ol>
 <li>Make sure the modules will work on other computers or environments. Test locally using a clean environment, ask other co-worker or contributor to review and test your code, and make sure to update your CI/CD tool to test the modules.</li>
 <li>Do maintenance periodically executing <code>go mod tidy</code> and when there are changes to the code.</li>
-<li>Repeat all the process when it&rsquo;s time to upgrade a module.</li>
+<li>Repeat all the process when it's time to upgrade a module.</li>
 </ol>
-
 <p>Let us know in your comments if you have other experience, best practices or tips to share during the process of devendorizing and modularizing your Go project.</p>
 
 

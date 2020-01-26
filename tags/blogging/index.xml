@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Blogging on Johandry&#39;s Blog</title>
@@ -18,9 +18,9 @@
       <pubDate>Sat, 28 Oct 2017 23:42:14 -0700</pubDate>
       
       <guid>http://blog.johandry.com/post/a-new-blog-on-github/</guid>
-      <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&amp;rsquo;t have to do it again but may help others to do the same.
-You&amp;rsquo;ll need Hugo and Git. Once you have Hugo, create the blog with:
-brew install hugo hugo new site blog cd blog git init  The next step is to choose a theme, which took me a long time.</description>
+      <description>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&#39;t have to do it again but may help others to do the same.
+You&#39;ll need Hugo and Git. Once you have Hugo, create the blog with:
+brew install hugo hugo new site blog cd blog git init The next step is to choose a theme, which took me a long time. Go to https://themes.</description>
     </item>
     
   </channel>

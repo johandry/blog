@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.58.3" />
+  <meta name="generator" content="Hugo 0.61.0" />
 
   <title>A New Blog on Github &middot; Johandry&#39;s Blog</title>
 
@@ -270,26 +270,17 @@
 
 </div>
 
-  
-
-<p>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don&rsquo;t have to do it again but may help others to do the same.</p>
-
-<p>You&rsquo;ll need Hugo and Git. Once you have Hugo, create the blog with:</p>
-
+  <p>Here is everything I did to create this blog with Hugo and publish it on GitHub. I don't have to do it again but may help others to do the same.</p>
+<p>You'll need Hugo and Git. Once you have Hugo, create the blog with:</p>
 <pre><code>brew install hugo
 hugo new site blog
 cd blog
 git init
-</code></pre>
-
-<p>The next step is to choose a theme, which took me a long time. Go to <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a>, make sure to browse the demo of the preferred themes. In my case I choose <a href="https://themes.gohugo.io/blackburn/">Blackburn</a>. Get the theme with:</p>
-
+</code></pre><p>The next step is to choose a theme, which took me a long time. Go to <a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a>, make sure to browse the demo of the preferred themes. In my case I choose <a href="https://themes.gohugo.io/blackburn/">Blackburn</a>. Get the theme with:</p>
 <pre><code>cd themes
 git clone https://github.com/yoshiharuyamashita/blackburn.git
 </code></pre>
-
 <p>Open <code>config.toml</code> and copy the content from the theme repository. Edit or add the following variables:</p>
-
 <ul>
 <li><strong>title</strong></li>
 <li><strong>author</strong></li>
@@ -301,9 +292,7 @@ git clone https://github.com/yoshiharuyamashita/blackburn.git
 <li><strong>highlightjs</strong></li>
 <li><strong>highlightjs_extra_languages</strong></li>
 </ul>
-
 <p>Example:</p>
-
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#a6e22e">title</span> = <span style="color:#e6db74">&#34;Johandry&#39;s Blog&#34;</span>
 <span style="color:#a6e22e">author</span> = <span style="color:#e6db74">&#34;Johandry Amador&#34;</span>
 <span style="color:#a6e22e">theme</span> = <span style="color:#e6db74">&#34;blackburn&#34;</span>
@@ -314,35 +303,23 @@ git clone https://github.com/yoshiharuyamashita/blackburn.git
   <span style="color:#a6e22e">disqus</span> = <span style="color:#e6db74">&#34;johandry&#34;</span>
   <span style="color:#a6e22e">highlightjs</span> = <span style="color:#e6db74">&#34;vs2015&#34;</span>
   <span style="color:#a6e22e">highlightjs_extra_languages</span> = [<span style="color:#e6db74">&#34;yaml&#34;</span>, <span style="color:#e6db74">&#34;bash&#34;</span>, <span style="color:#e6db74">&#34;dockerfile&#34;</span>, <span style="color:#e6db74">&#34;go&#34;</span>, <span style="color:#e6db74">&#34;json&#34;</span>, <span style="color:#e6db74">&#34;makefile&#34;</span>, <span style="color:#e6db74">&#34;shell&#34;</span>]</code></pre></div>
-
-<p>Modify, if you need it, the links or content in the <code>[menu]</code> section and add the username or ID in the <code>[social]</code> section or delete those you don&rsquo;t have.</p>
-
+<p>Modify, if you need it, the links or content in the <code>[menu]</code> section and add the username or ID in the <code>[social]</code> section or delete those you don't have.</p>
 <p>You are ready for the first post!</p>
-
 <pre><code>hugo new post/first-post.md
 </code></pre>
-
 <p>Open the file <code>post/first-post.md</code> to add your first content.</p>
-
 <p>Use <code>hugo</code> to see how it looks:</p>
-
 <pre><code>hugo server -D
 </code></pre>
-
 <p>Now open in a browser <a href="http://localhost:1313">http://localhost:1313</a>.</p>
-
-<p>When you are happy with the content, make sure to remove the metadata <code>draft</code>. Otherwise it won&rsquo;t be considered by hugo when regenerate the site. Also, include the tags or topics using the metadata <code>tags</code> and <code>topics</code>, like this:</p>
-
+<p>When you are happy with the content, make sure to remove the metadata <code>draft</code>. Otherwise it won't be considered by hugo when regenerate the site. Also, include the tags or topics using the metadata <code>tags</code> and <code>topics</code>, like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml">---
 title: <span style="color:#e6db74">&#34;A New Blog on Github&#34;</span>
 date: <span style="color:#e6db74">2017-10-28T23:42:14</span><span style="color:#ae81ff">-07</span>:<span style="color:#ae81ff">00</span>
 tags: [<span style="color:#e6db74">&#34;Hugo&#34;</span>, <span style="color:#e6db74">&#34;Blogging&#34;</span>]
 ---</code></pre></div>
-
 <p>From the 3 options to publish the blog on GitHub I opt for the <a href="https://gohugo.io/hosting-and-deployment/hosting-on-github/#deployment-from-your-gh-pages-branch">gh-pages branch</a> option. And this is what I did:</p>
-
 <p>Create a GitHub repository named <code>blog</code>, very original, right?</p>
-
 <pre><code># Ignore public/ in the master branch:
 echo &quot;public&quot; &gt;&gt; .gitignore
 
@@ -363,18 +340,12 @@ git checkout master
 rm -rf public
 git worktree add -B gh-pages public origin/gh-pages
 </code></pre>
-
-<p>Go to the DNS service and create a subdomain named <code>blog</code> configured as an alias for the CNAME of my github page, which is <code>johandry.github.io</code>. In my repository I also have the project <code>johandry.github.io</code> so it&rsquo;s required to create the file <code>static/CNAME</code> with the domain name.</p>
-
+<p>Go to the DNS service and create a subdomain named <code>blog</code> configured as an alias for the CNAME of my github page, which is <code>johandry.github.io</code>. In my repository I also have the project <code>johandry.github.io</code> so it's required to create the file <code>static/CNAME</code> with the domain name.</p>
 <pre><code>echo &quot;blog.johandry.com&quot; &gt; static/CNAME
 </code></pre>
-
 <p>Go to <strong>Settings</strong> → <strong>GitHub Pages</strong> in the blog repository. Make sure <strong>Source</strong> is set to <code>gh-pages branch</code> and enter the domain name in <strong>Custom Domain</strong> (i.e. <code>blog.johandry.com</code>).</p>
-
 <p>Open <code>config.toml</code> again and update the <code>baseURL</code> variable to the base URL using the domain name: <code>baseURL = &quot;http://blog.johandry.com/&quot;</code>.</p>
-
 <p>Regenerate the blog, commit and push it:</p>
-
 <pre><code>hugo
 
 cd public
@@ -384,11 +355,8 @@ cd ..
 
 git push origin gh-pages
 </code></pre>
-
 <p>You may have to wait a few minutes for the domain name to be replicated, then go to <code>http://blog.johandry.com</code> to test your new blog.</p>
-
 <h2 id="sources">Sources</h2>
-
 <ul>
 <li>Hugo Quick Start: <a href="https://gohugo.io/getting-started/quick-start/">https://gohugo.io/getting-started/quick-start/</a></li>
 <li>Blackburn Repository: <a href="https://github.com/yoshiharuyamashita/blackburn">https://github.com/yoshiharuyamashita/blackburn</a></li>

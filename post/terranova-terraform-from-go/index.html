@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.58.3" />
+  <meta name="generator" content="Hugo 0.61.0" />
 
   <title>Terranova: Using Terraform from Go &middot; Johandry&#39;s Blog</title>
 
@@ -272,313 +272,239 @@
 
 </div>
 
-  
-
-<p><a href="http://terraform.io">Terraform</a> is an amazing tool made by <a href="https://www.hashicorp.com">HashiCorp</a> to describe infrastructure as a code. Terraform allow us to build, change, and do versioning of the infrastructure safely and efficiently. The use of Terraform is quite simple, after download the binary you need to create a terraform configuration file or files to describe the infrastructure to build. The first time you have to initialize terraform (<code>terraform init</code>) to download all the dependencies and then apply the changes (<code>terraform apply</code>). Any further change is as simple as modify the configuration file and apply the changes again. When the infrastructure is not needed, you just destroy it (<code>terraform destroy</code>).</p>
-
+  <p><a href="http://terraform.io">Terraform</a> is an amazing tool made by <a href="https://www.hashicorp.com">HashiCorp</a> to describe infrastructure as a code. Terraform allow us to build, change, and do versioning of the infrastructure safely and efficiently. The use of Terraform is quite simple, after download the binary you need to create a terraform configuration file or files to describe the infrastructure to build. The first time you have to initialize terraform (<code>terraform init</code>) to download all the dependencies and then apply the changes (<code>terraform apply</code>). Any further change is as simple as modify the configuration file and apply the changes again. When the infrastructure is not needed, you just destroy it (<code>terraform destroy</code>).</p>
 <p>Many developers automate terraform tasks calling the binary from a script or a program and that’s totally fine. However if you are coding in Go and knowing that Terraform is made in Go (free and available on <a href="https://github.com/hashicorp/terraform">GitHub</a>), why not use the Terraform packages instead of the binary?</p>
-
 <p>One reason - and, to me, maybe the most important - to use the Terraform package instead of the binary is to provide to the users one single executable file to build and change the infrastructure. In a regular scenario the user have to download the Terraform binary, the configuration files (usually more than one) and the instructions or a script automating the process. Too many files, steps and dependencies, right?</p>
-
 <p>The use of the Terraform package is simple once you are familiar with it. In order to make it simpler and easier to you, I will explain how to use the Go package <strong><a href="https://github.com/johandry/terranova">Terranova</a></strong>.</p>
-
 <h2 id="how-to-use-the-terranova-library">How to use the Terranova library</h2>
-
 <p>There are several objects needed by Terranova and therefore by Terraform to work:</p>
-
 <ul>
-<li><strong>Code</strong>: It&rsquo;s basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.</li>
+<li><strong>Code</strong>: It's basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.</li>
 <li><strong>Providers</strong>: A Provider is the interface between terraform and the underlying platform which is usually an IaaS (i.e. AWS, GCP, MS Azure, VMWare), PaaS (i.e. Heroku) or SaaS (i.e. DNSimple). The entire list is here: <a href="https://www.terraform.io/docs/providers/">https://www.terraform.io/docs/providers/</a></li>
 <li><strong>Provisioners</strong>: The Provisioners are used to execute scripts on a local or remote machine, transfer files to remote machines and handling of configuration managers (i.e. Check, Salt). To know more or get the entire list, check this out: <a href="https://www.terraform.io/docs/provisioners/">https://www.terraform.io/docs/provisioners/</a></li>
 <li><strong>Variables</strong>: The Code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.</li>
-<li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It&rsquo;s important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
+<li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It's important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
 </ul>
-
-<p>Terranova works better as a Go module, if you don&rsquo;t have a <code>go.mod</code> file in your project, create it with <code>go mod init [package full name]</code>, for example:</p>
-
-<pre><code class="language-bash">go mod init github.com/user/myproject
-</code></pre>
-
-<p>Then import Terranova in the Go code</p>
-
+<p>Terranova works better as a Go module, if you don't have a <code>go.mod</code> file in your project, create it with <code>go mod init [package full name]</code>, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod init github.com/user/myproject
+</code></pre></div><p>Then import Terranova in the Go code</p>
 <pre><code>import (
   &quot;github.com/johandry/terranova&quot;
 )
-</code></pre>
-
-<p>As soon as you execute a Go command such as <code>go build</code> or <code>go test</code> it will be included in your <code>go.mod</code> file , create or update the <code>go.sum</code> file and download the required packages/modules.</p>
-
-<p>If you are not using modules and still using the $GOPATH, you may have problems executing <code>go get</code>, so I&rsquo;d recommend to use a vendor manager or use <code>go mod vendor</code> to deal with the errors.</p>
-
+</code></pre><p>As soon as you execute a Go command such as <code>go build</code> or <code>go test</code> it will be included in your <code>go.mod</code> file , create or update the <code>go.sum</code> file and download the required packages/modules.</p>
+<p>If you are not using modules and still using the $GOPATH, you may have problems executing <code>go get </code>, so I'd recommend to use a vendor manager or use <code>go mod vendor</code> to deal with the errors.</p>
 <h3 id="code">Code</h3>
-
 <p>To create the Terraform Code we need a string variable to store it either as a plain text or a template but to keep to simple lets use plain text.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">code</span> <span style="color:#66d9ef">string</span>
 
-<pre><code class="language-go">var code string
-
-func init() {
-  code = `
-  variable &quot;count&quot;            {}
-  variable &quot;public_key_file&quot;  { default = &quot;~/.ssh/id_rsa.pub&quot; }
-  variable &quot;private_key_file&quot; { default = &quot;~/.ssh/id_rsa&quot; }
-  locals {
-    public_key    = &quot;${file(pathexpand(var.public_key_file))}&quot;
-    private_key   = &quot;${file(pathexpand(var.private_key_file))}&quot;
-  }
-  provider &quot;aws&quot; {
-    region        = &quot;us-west-2&quot;
-  }
-  resource &quot;aws_instance&quot; &quot;server&quot; {
-    instance_type = &quot;t2.micro&quot;
-    ami           = &quot;ami-6e1a0117&quot;
-    count         = &quot;${var.count}&quot;
-    key_name      = &quot;server_key&quot;
-
-    provisioner &quot;file&quot; {
-      content     = &quot;ami used: ${self.ami}&quot;
-      destination = &quot;/tmp/file.log&quot;
-
-      connection {
-        user        = &quot;ubuntu&quot;
-        private_key = &quot;${local.private_key}&quot;
-      }
-    }
-  }
-  resource &quot;aws_key_pair&quot; &quot;keypair&quot; {
-    key_name    = &quot;server_key&quot;
-    public_key  = &quot;${local.public_key}&quot;
-  }
-`
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+  <span style="color:#a6e22e">code</span> = <span style="color:#e6db74">`</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">  variable &#34;count&#34;            </span><span style="color:#e6db74">{</span><span style="color:#e6db74">}
+</span><span style="color:#e6db74">  variable &#34;public_key_file&#34;  </span><span style="color:#e6db74">{</span><span style="color:#e6db74"> default = &#34;~/.ssh/id_rsa.pub&#34; }
+</span><span style="color:#e6db74">  variable &#34;private_key_file&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74"> default = &#34;~/.ssh/id_rsa&#34; }
+</span><span style="color:#e6db74">  locals </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    public_key    = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">file(pathexpand(var.public_key_file))}&#34;
+</span><span style="color:#e6db74">    private_key   = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">file(pathexpand(var.private_key_file))}&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  provider &#34;aws&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    region        = &#34;us-west-2&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  resource &#34;aws_instance&#34; &#34;server&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    instance_type = &#34;t2.micro&#34;
+</span><span style="color:#e6db74">    ami           = &#34;ami-6e1a0117&#34;
+</span><span style="color:#e6db74">    count         = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">var.count}&#34;
+</span><span style="color:#e6db74">    key_name      = &#34;server_key&#34;
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    provisioner &#34;file&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">      content     = &#34;ami used: $</span><span style="color:#e6db74">{</span><span style="color:#e6db74">self.ami}&#34;
+</span><span style="color:#e6db74">      destination = &#34;/tmp/file.log&#34;
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">      connection </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">        user        = &#34;ubuntu&#34;
+</span><span style="color:#e6db74">        private_key = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">local.private_key}&#34;
+</span><span style="color:#e6db74">      }
+</span><span style="color:#e6db74">    }
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  resource &#34;aws_key_pair&#34; &#34;keypair&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    key_name    = &#34;server_key&#34;
+</span><span style="color:#e6db74">    public_key  = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">local.public_key}&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">`</span>
 }
-</code></pre>
-
-<p>In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region <code>us-west-2</code>. Also to create a Key Pair made from the public key.</p>
-
+</code></pre></div><p>In this example the Terraform code is to create a given number of AWS EC2 Ubuntu instances on the AWS region <code>us-west-2</code>. Also to create a Key Pair made from the public key.</p>
 <p>Now we are ready to create an instance of the <a href="https://github.com/johandry/terranova/blob/master/platform.go"><code>Platform</code> struct</a> using <code>NewPlatform()</code> passing the code as a parameter.</p>
-
-<pre><code class="language-go">func main() {
-  platform, err := terranova.NewPlatform(code)
-  if err != nil {
-    log.Fatalf(&quot;Fail to initialize the platform. %s&quot;, err)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#a6e22e">platform</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">terranova</span>.<span style="color:#a6e22e">NewPlatform</span>(<span style="color:#a6e22e">code</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to initialize the platform. %s&#34;</span>, <span style="color:#a6e22e">err</span>)
   }
 }
-</code></pre>
-
-<h3 id="providers">Providers</h3>
-
+</code></pre></div><h3 id="providers">Providers</h3>
 <p>The Terraform code used in this example uses the AWS Provider, so we have to make this provider available to the platform first getting and importing the package, then using the <code>AddProvider()</code> function.</p>
-
-<pre><code class="language-bash">go get -u github.com/terraform-providers/terraform-provider-aws/aws
-</code></pre>
-
-<pre><code class="language-go">import (
-    ...
-  &quot;github.com/terraform-providers/terraform-provider-aws/aws&quot;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get -u github.com/terraform-providers/terraform-provider-aws/aws
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+    <span style="color:#f92672">...</span>
+  <span style="color:#e6db74">&#34;github.com/terraform-providers/terraform-provider-aws/aws&#34;</span>
 )
-</code></pre>
-
-<pre><code class="language-go">func main() {
-    ...
-  platform.AddProvider(&quot;aws&quot;, aws.Provider())
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvider</span>(<span style="color:#e6db74">&#34;aws&#34;</span>, <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">Provider</span>())
 }
-</code></pre>
-
-<p>Your code can include more than one provider, for example, if the code is to create host in the  cloud or different platforms this code has to import all the packages and add those that are needed by the Terraform code.</p>
-
-<p>The only Provider that is loaded by default is <code>null</code>. It&rsquo;s a resource that allows you to configure provisioners that are not directly associated with a single existing resource.</p>
-
+</code></pre></div><p>Your code can include more than one provider, for example, if the code is to create host in the  cloud or different platforms this code has to import all the packages and add those that are needed by the Terraform code.</p>
+<p>The only Provider that is loaded by default is <code>null</code>. It's a resource that allows you to configure provisioners that are not directly associated with a single existing resource.</p>
 <h3 id="provisioners">Provisioners</h3>
-
 <p>Every Terraform code uses at least one Provider, but not all the Terraform codes uses a provisioner. In this example we are using the provisioner <code>file</code>, so same as with providers, we have to get it, import it and add it.</p>
-
-<pre><code class="language-bash">go get -u github.com/hashicorp/terraform/builtin/provisioners/file
-</code></pre>
-
-<pre><code class="language-go">import (
-    ...
-  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get -u github.com/hashicorp/terraform/builtin/provisioners/file
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+    <span style="color:#f92672">...</span>
+  <span style="color:#e6db74">&#34;github.com/hashicorp/terraform/builtin/provisioners/file&#34;</span>
 )
-</code></pre>
-
-<pre><code class="language-go">func main() {
-    ...
-  platform.AddProvisioner(&quot;file&quot;, file.Provisioner())
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvisioner</span>(<span style="color:#e6db74">&#34;file&#34;</span>, <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Provisioner</span>())
 }
-</code></pre>
-
-<p>The most common and useful provisioner to use are:</p>
-
+</code></pre></div><p>The most common and useful provisioner to use are:</p>
 <ul>
 <li><code>file</code>: used to copy files or directories from the local machine to the newly created resource.</li>
 <li><code>local-exec</code>: invokes a local executable after a resource is created on the local machine.</li>
 <li><code>remote-exec</code>: invokes a script on a remote resource after it is created.</li>
 </ul>
-
 <p>Look at the sample code below to know how to import the package and to call the method <code>AddProvisioner()</code>  for these Provisioners:</p>
-
-<pre><code class="language-go">import (
-  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
-  localexec &quot;github.com/hashicorp/terraform/builtin/provisioners/local-exec&quot;
-  remoteexec &quot;github.com/hashicorp/terraform/builtin/provisioners/remote-exec&quot;
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+  <span style="color:#e6db74">&#34;github.com/hashicorp/terraform/builtin/provisioners/file&#34;</span>
+  <span style="color:#a6e22e">localexec</span> <span style="color:#e6db74">&#34;github.com/hashicorp/terraform/builtin/provisioners/local-exec&#34;</span>
+  <span style="color:#a6e22e">remoteexec</span> <span style="color:#e6db74">&#34;github.com/hashicorp/terraform/builtin/provisioners/remote-exec&#34;</span>
 )
-...
-platform.AddProvisioner(&quot;file&quot;, file.Provisioner())
-platform.AddProvisioner(&quot;local-exec&quot;, localexec.Provisioner())
-platform.AddProvisioner(&quot;remote-exec&quot;, remoteexec.Provisioner())
-</code></pre>
-
-<p>If you use Chef or Salt as configuration managers, there are provisioners for both that can configure the newly created resource.</p>
-
+<span style="color:#f92672">...</span>
+<span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvisioner</span>(<span style="color:#e6db74">&#34;file&#34;</span>, <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Provisioner</span>())
+<span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvisioner</span>(<span style="color:#e6db74">&#34;local-exec&#34;</span>, <span style="color:#a6e22e">localexec</span>.<span style="color:#a6e22e">Provisioner</span>())
+<span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvisioner</span>(<span style="color:#e6db74">&#34;remote-exec&#34;</span>, <span style="color:#a6e22e">remoteexec</span>.<span style="color:#a6e22e">Provisioner</span>())
+</code></pre></div><p>If you use Chef or Salt as configuration managers, there are provisioners for both that can configure the newly created resource.</p>
 <h3 id="variables">Variables</h3>
-
 <p>The Terraform code allows you to define and use variables and variables that behaves like constants. This may be an optional feature if you use Go templates to create the Terraform code with static values or assigning default values to variables. If you are using plain text code, just like in this example, then variables is something you may want to use.</p>
-
 <p>In this example we have three variables: <code>count</code>, <code>public_key_file</code> and <code>private_key_file</code>. The key files variables has a default value so not adding a value for <code>count</code> will cause an error.</p>
-
-<pre><code class="language-go">func main() {
-  count := 1
-    ...
-  platform.Var(&quot;count&quot;, count)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#a6e22e">count</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>
+    <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">Var</span>(<span style="color:#e6db74">&#34;count&#34;</span>, <span style="color:#a6e22e">count</span>)
 }
-</code></pre>
-
-<p>Other option would be to use the function <code>BindVars()</code> which is handy when you get the variables after unmarshalling a JSON, Yaml or Toml file with the values.</p>
-
-<pre><code class="language-go">func main() {
-  vars := map[string]interface{}{
-    &quot;count&quot;: 1,
+</code></pre></div><p>Other option would be to use the function <code>BindVars()</code> which is handy when you get the variables after unmarshalling a JSON, Yaml or Toml file with the values.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#a6e22e">vars</span> <span style="color:#f92672">:=</span> <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">interface</span>{}{
+    <span style="color:#e6db74">&#34;count&#34;</span>: <span style="color:#ae81ff">1</span>,
   }
-  ...
-  platform.BindVars(vars)
+  <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">BindVars</span>(<span style="color:#a6e22e">vars</span>)
 }
-</code></pre>
-
-<h3 id="apply-changes">Apply changes</h3>
-
+</code></pre></div><h3 id="apply-changes">Apply changes</h3>
 <p>Once you have the Platform with the Code, Providers, Provisioners and the Variables loaded you can apply the code to the platform to get the changes done. It could be to modify the infrastructure (i.e. increasing or decreasing the number of instances) or to destroy everything done.</p>
-
 <p>To achieve this we use the function <code>Apply(bool)</code> which receives a boolean to know if the actions to apply are to destroy/terminate the infrastructure or not.</p>
-
-<pre><code class="language-go">func main() {
-    ...
-  terminate := (count == 0)
-  if err := platform.Apply(terminate); err != nil {
-    log.Fatalf(&quot;Fail to apply the changes to the platform. %s&quot;, err)
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+    <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">terminate</span> <span style="color:#f92672">:=</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">Apply</span>(<span style="color:#a6e22e">terminate</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to apply the changes to the platform. %s&#34;</span>, <span style="color:#a6e22e">err</span>)
   }
 }
-</code></pre>
-
-<h3 id="state">State</h3>
-
+</code></pre></div><h3 id="state">State</h3>
 <p>After applying the changes the infrastructure state also change. This state will be needed to do more changes to this infrastructure later, such as increase or decrease the number of instances, or destroy everything to save money.</p>
+<p>So, as you have notice, it's important to make this state persistent saving it into a file after applying the changes and to load the state (if any) before applying the changes.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">stateFilename</span> = <span style="color:#e6db74">&#34;aws-ec2-ubuntu.tfstate&#34;</span>
 
-<p>So, as you have notice, it&rsquo;s important to make this state persistent saving it into a file after applying the changes and to load the state (if any) before applying the changes.</p>
-
-<pre><code class="language-go">const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
-
-func main() {
-  ...
-  if _, err := platform.ReadStateFile(stateFilename); err != nil {
-    log.Fatalf(&quot;Fail to load the state of the platform from %s. %s&quot;, stateFilename, err)
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#f92672">...</span>
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">ReadStateFile</span>(<span style="color:#a6e22e">stateFilename</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to load the state of the platform from %s. %s&#34;</span>, <span style="color:#a6e22e">stateFilename</span>, <span style="color:#a6e22e">err</span>)
   }
-    ...
-    // here is where Apply() is call
-    ...
-  if _, err := platform.WriteStateFile(stateFilename); err != nil {
-    log.Fatalf(&quot;Fail to save the state of the platform to file %s. %s&quot;, stateFilename, err)
+    <span style="color:#f92672">...</span>
+    <span style="color:#75715e">// here is where Apply() is call
+</span><span style="color:#75715e"></span>    <span style="color:#f92672">...</span>
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">WriteStateFile</span>(<span style="color:#a6e22e">stateFilename</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to save the state of the platform to file %s. %s&#34;</span>, <span style="color:#a6e22e">stateFilename</span>, <span style="color:#a6e22e">err</span>)
   }
 }
-</code></pre>
+</code></pre></div><p>And that's basically all you need to use Terranova to help you to use Terraform from a Go program. The entire code looks like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 
-<p>And that&rsquo;s basically all you need to use Terranova to help you to use Terraform from a Go program. The entire code looks like this:</p>
+<span style="color:#f92672">import</span> (
+  <span style="color:#e6db74">&#34;log&#34;</span>
+  <span style="color:#e6db74">&#34;os&#34;</span>
 
-<pre><code class="language-go">package main
-
-import (
-  &quot;log&quot;
-  &quot;os&quot;
-
-  &quot;github.com/hashicorp/terraform/builtin/provisioners/file&quot;
-  &quot;github.com/johandry/terranova&quot;
-  &quot;github.com/terraform-providers/terraform-provider-aws/aws&quot;
+  <span style="color:#e6db74">&#34;github.com/hashicorp/terraform/builtin/provisioners/file&#34;</span>
+  <span style="color:#e6db74">&#34;github.com/johandry/terranova&#34;</span>
+  <span style="color:#e6db74">&#34;github.com/terraform-providers/terraform-provider-aws/aws&#34;</span>
 )
 
-var code string
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">code</span> <span style="color:#66d9ef">string</span>
 
-const stateFilename = &quot;aws-ec2-ubuntu.tfstate&quot;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">stateFilename</span> = <span style="color:#e6db74">&#34;aws-ec2-ubuntu.tfstate&#34;</span>
 
-func main() {
-  count := 1
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+  <span style="color:#a6e22e">count</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">1</span>
 
-  platform, err := terranova.NewPlatform(code).
-    AddProvider(&quot;aws&quot;, aws.Provider()).
-    AddProvisioner(&quot;file&quot;, file.Provisioner()).
-    Var(&quot;count&quot;, count).
-    ReadStateFromFile(stateFilename)
+  <span style="color:#a6e22e">platform</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">terranova</span>.<span style="color:#a6e22e">NewPlatform</span>(<span style="color:#a6e22e">code</span>).
+    <span style="color:#a6e22e">AddProvider</span>(<span style="color:#e6db74">&#34;aws&#34;</span>, <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">Provider</span>()).
+    <span style="color:#a6e22e">AddProvisioner</span>(<span style="color:#e6db74">&#34;file&#34;</span>, <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Provisioner</span>()).
+    <span style="color:#a6e22e">Var</span>(<span style="color:#e6db74">&#34;count&#34;</span>, <span style="color:#a6e22e">count</span>).
+    <span style="color:#a6e22e">ReadStateFromFile</span>(<span style="color:#a6e22e">stateFilename</span>)
 
-  if err != nil {
-    if os.IsNotExist(err) {
-      log.Printf(&quot;[DEBUG] state file %s does not exists&quot;, stateFilename)
-    } else {
-      log.Fatalf(&quot;Fail to load the initial state of the platform from file %s. %s&quot;, stateFilename, err)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">IsNotExist</span>(<span style="color:#a6e22e">err</span>) {
+      <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;[DEBUG] state file %s does not exists&#34;</span>, <span style="color:#a6e22e">stateFilename</span>)
+    } <span style="color:#66d9ef">else</span> {
+      <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to load the initial state of the platform from file %s. %s&#34;</span>, <span style="color:#a6e22e">stateFilename</span>, <span style="color:#a6e22e">err</span>)
     }
   }
 
-  terminate := (count == 0)
-  if err := platform.Apply(terminate); err != nil {
-    log.Fatalf(&quot;Fail to apply the changes to the platform. %s&quot;, err)
+  <span style="color:#a6e22e">terminate</span> <span style="color:#f92672">:=</span> (<span style="color:#a6e22e">count</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">Apply</span>(<span style="color:#a6e22e">terminate</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to apply the changes to the platform. %s&#34;</span>, <span style="color:#a6e22e">err</span>)
   }
 
-  if _, err := platform.WriteStateFile(stateFilename); err != nil {
-    log.Fatalf(&quot;Fail to save the final state of the platform to file %s. %s&quot;, stateFilename, err)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">WriteStateFile</span>(<span style="color:#a6e22e">stateFilename</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to save the final state of the platform to file %s. %s&#34;</span>, <span style="color:#a6e22e">stateFilename</span>, <span style="color:#a6e22e">err</span>)
   }
 }
 
-func init() {
-  code = `
-  variable &quot;count&quot;            { default = 2 }
-  variable &quot;public_key_file&quot;  { default = &quot;~/.ssh/id_rsa.pub&quot; }
-  variable &quot;private_key_file&quot; { default = &quot;~/.ssh/id_rsa&quot; }
-  locals {
-    public_key    = &quot;${file(pathexpand(var.public_key_file))}&quot;
-    private_key   = &quot;${file(pathexpand(var.private_key_file))}&quot;
-  }
-  provider &quot;aws&quot; {
-    region        = &quot;us-west-2&quot;
-  }
-  resource &quot;aws_instance&quot; &quot;server&quot; {
-    instance_type = &quot;t2.micro&quot;
-    ami           = &quot;ami-6e1a0117&quot;
-    count         = &quot;${var.count}&quot;
-    key_name      = &quot;server_key&quot;
-
-    provisioner &quot;file&quot; {
-      content     = &quot;ami used: ${self.ami}&quot;
-      destination = &quot;/tmp/file.log&quot;
-
-      connection {
-        user        = &quot;ubuntu&quot;
-        private_key = &quot;${local.private_key}&quot;
-      }
-    }
-  }
-  resource &quot;aws_key_pair&quot; &quot;keypair&quot; {
-    key_name    = &quot;server_key&quot;
-    public_key  = &quot;${local.public_key}&quot;
-  }
-`
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">init</span>() {
+  <span style="color:#a6e22e">code</span> = <span style="color:#e6db74">`</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">  variable &#34;count&#34;            </span><span style="color:#e6db74">{</span><span style="color:#e6db74"> default = 2 }
+</span><span style="color:#e6db74">  variable &#34;public_key_file&#34;  </span><span style="color:#e6db74">{</span><span style="color:#e6db74"> default = &#34;~/.ssh/id_rsa.pub&#34; }
+</span><span style="color:#e6db74">  variable &#34;private_key_file&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74"> default = &#34;~/.ssh/id_rsa&#34; }
+</span><span style="color:#e6db74">  locals </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    public_key    = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">file(pathexpand(var.public_key_file))}&#34;
+</span><span style="color:#e6db74">    private_key   = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">file(pathexpand(var.private_key_file))}&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  provider &#34;aws&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    region        = &#34;us-west-2&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  resource &#34;aws_instance&#34; &#34;server&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    instance_type = &#34;t2.micro&#34;
+</span><span style="color:#e6db74">    ami           = &#34;ami-6e1a0117&#34;
+</span><span style="color:#e6db74">    count         = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">var.count}&#34;
+</span><span style="color:#e6db74">    key_name      = &#34;server_key&#34;
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    provisioner &#34;file&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">      content     = &#34;ami used: $</span><span style="color:#e6db74">{</span><span style="color:#e6db74">self.ami}&#34;
+</span><span style="color:#e6db74">      destination = &#34;/tmp/file.log&#34;
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">      connection </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">        user        = &#34;ubuntu&#34;
+</span><span style="color:#e6db74">        private_key = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">local.private_key}&#34;
+</span><span style="color:#e6db74">      }
+</span><span style="color:#e6db74">    }
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74">  resource &#34;aws_key_pair&#34; &#34;keypair&#34; </span><span style="color:#e6db74">{</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    key_name    = &#34;server_key&#34;
+</span><span style="color:#e6db74">    public_key  = &#34;$</span><span style="color:#e6db74">{</span><span style="color:#e6db74">local.public_key}&#34;
+</span><span style="color:#e6db74">  }
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">`</span>
 }
 
-</code></pre>
-
-<p>This code example with a few more improvements is located in the <a href="https://github.com/johandry/terranova-examples/blob/master/aws/ec2/main.go">Terranova examples repository</a>.</p>
-
-<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package directly just like Terranova does it.</p>
-
-<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform directly. The Hashicorp&rsquo;s Terraform code change as well as their package contract and they are not forced to keep it because it&rsquo;s their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
-
-<p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we&rsquo;ll include it.</p>
-
+</code></pre></div><p>This code example with a few more improvements is located in the <a href="https://github.com/johandry/terranova-examples/blob/master/aws/ec2/main.go">Terranova examples repository</a>.</p>
+<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp's Terraform package directly just like Terranova does it.</p>
+<p>There is an advantage of using Terranova vs using Hashicorp's Terraform directly. The Hashicorp's Terraform code change as well as their package contract and they are not forced to keep it because it's their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
+<p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we'll include it.</p>
 <p>This is not the last post about this topic, next post will be about how to use the Hashicorp Terraform Go just like Terranova uses it, and there will be a more about how to use your infrastructure code as a Go template, using Hooks to execute some actions for every Terraform activity such as logging, print output, update counters; and how to get values from your new infrastructure such as number of instances created/updated, IP or DNS addresses.</p>
 
 
