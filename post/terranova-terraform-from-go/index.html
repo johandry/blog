@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.64.0" />
 
   <title>Terranova: Using Terraform from Go &middot; Johandry&#39;s Blog</title>
 
@@ -279,20 +279,20 @@
 <h2 id="how-to-use-the-terranova-library">How to use the Terranova library</h2>
 <p>There are several objects needed by Terranova and therefore by Terraform to work:</p>
 <ul>
-<li><strong>Code</strong>: It's basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.</li>
+<li><strong>Code</strong>: It&rsquo;s basically the content of the configuration file(s), it may be a plain text or a Go template. This is the Infrastructure as a code.</li>
 <li><strong>Providers</strong>: A Provider is the interface between terraform and the underlying platform which is usually an IaaS (i.e. AWS, GCP, MS Azure, VMWare), PaaS (i.e. Heroku) or SaaS (i.e. DNSimple). The entire list is here: <a href="https://www.terraform.io/docs/providers/">https://www.terraform.io/docs/providers/</a></li>
 <li><strong>Provisioners</strong>: The Provisioners are used to execute scripts on a local or remote machine, transfer files to remote machines and handling of configuration managers (i.e. Check, Salt). To know more or get the entire list, check this out: <a href="https://www.terraform.io/docs/provisioners/">https://www.terraform.io/docs/provisioners/</a></li>
 <li><strong>Variables</strong>: The Code may have references to terraform variables. This may be optional as we can handle variables in different ways in the Go code.</li>
-<li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It's important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
+<li><strong>State</strong>: This is final state of the infrastructure when the build or a change is done. It&rsquo;s important to keep the state in a save place to apply the further changes or destroy everything that was built.</li>
 </ul>
-<p>Terranova works better as a Go module, if you don't have a <code>go.mod</code> file in your project, create it with <code>go mod init [package full name]</code>, for example:</p>
+<p>Terranova works better as a Go module, if you don&rsquo;t have a <code>go.mod</code> file in your project, create it with <code>go mod init [package full name]</code>, for example:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod init github.com/user/myproject
 </code></pre></div><p>Then import Terranova in the Go code</p>
 <pre><code>import (
   &quot;github.com/johandry/terranova&quot;
 )
 </code></pre><p>As soon as you execute a Go command such as <code>go build</code> or <code>go test</code> it will be included in your <code>go.mod</code> file , create or update the <code>go.sum</code> file and download the required packages/modules.</p>
-<p>If you are not using modules and still using the $GOPATH, you may have problems executing <code>go get </code>, so I'd recommend to use a vendor manager or use <code>go mod vendor</code> to deal with the errors.</p>
+<p>If you are not using modules and still using the $GOPATH, you may have problems executing <code>go get </code>, so I&rsquo;d recommend to use a vendor manager or use <code>go mod vendor</code> to deal with the errors.</p>
 <h3 id="code">Code</h3>
 <p>To create the Terraform Code we need a string variable to store it either as a plain text or a template but to keep to simple lets use plain text.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">code</span> <span style="color:#66d9ef">string</span>
@@ -351,7 +351,7 @@
   <span style="color:#a6e22e">platform</span>.<span style="color:#a6e22e">AddProvider</span>(<span style="color:#e6db74">&#34;aws&#34;</span>, <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">Provider</span>())
 }
 </code></pre></div><p>Your code can include more than one provider, for example, if the code is to create host in the  cloud or different platforms this code has to import all the packages and add those that are needed by the Terraform code.</p>
-<p>The only Provider that is loaded by default is <code>null</code>. It's a resource that allows you to configure provisioners that are not directly associated with a single existing resource.</p>
+<p>The only Provider that is loaded by default is <code>null</code>. It&rsquo;s a resource that allows you to configure provisioners that are not directly associated with a single existing resource.</p>
 <h3 id="provisioners">Provisioners</h3>
 <p>Every Terraform code uses at least one Provider, but not all the Terraform codes uses a provisioner. In this example we are using the provisioner <code>file</code>, so same as with providers, we have to get it, import it and add it.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get -u github.com/hashicorp/terraform/builtin/provisioners/file
@@ -408,7 +408,7 @@
 }
 </code></pre></div><h3 id="state">State</h3>
 <p>After applying the changes the infrastructure state also change. This state will be needed to do more changes to this infrastructure later, such as increase or decrease the number of instances, or destroy everything to save money.</p>
-<p>So, as you have notice, it's important to make this state persistent saving it into a file after applying the changes and to load the state (if any) before applying the changes.</p>
+<p>So, as you have notice, it&rsquo;s important to make this state persistent saving it into a file after applying the changes and to load the state (if any) before applying the changes.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">stateFilename</span> = <span style="color:#e6db74">&#34;aws-ec2-ubuntu.tfstate&#34;</span>
 
 <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
@@ -423,7 +423,7 @@
     <span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Fatalf</span>(<span style="color:#e6db74">&#34;Fail to save the state of the platform to file %s. %s&#34;</span>, <span style="color:#a6e22e">stateFilename</span>, <span style="color:#a6e22e">err</span>)
   }
 }
-</code></pre></div><p>And that's basically all you need to use Terranova to help you to use Terraform from a Go program. The entire code looks like this:</p>
+</code></pre></div><p>And that&rsquo;s basically all you need to use Terranova to help you to use Terraform from a Go program. The entire code looks like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 
 <span style="color:#f92672">import</span> (
@@ -502,9 +502,9 @@
 }
 
 </code></pre></div><p>This code example with a few more improvements is located in the <a href="https://github.com/johandry/terranova-examples/blob/master/aws/ec2/main.go">Terranova examples repository</a>.</p>
-<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp's Terraform package directly just like Terranova does it.</p>
-<p>There is an advantage of using Terranova vs using Hashicorp's Terraform directly. The Hashicorp's Terraform code change as well as their package contract and they are not forced to keep it because it's their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
-<p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we'll include it.</p>
+<p>The Terranova package is just an API that makes it easy to the Go developers to use the Terraform package made by Hashicorp but to use it is optional, you can use the Hashicorp&rsquo;s Terraform package directly just like Terranova does it.</p>
+<p>There is an advantage of using Terranova vs using Hashicorp&rsquo;s Terraform directly. The Hashicorp&rsquo;s Terraform code change as well as their package contract and they are not forced to keep it because it&rsquo;s their code and what they produce and provide is Terraform binary, not the internal code. So, when Hashicorp changes the code and the contract, all of you using the Terraform code will have to do it as well. Having a package that works as as an interface to the Hashicorp Terraform code would help us to keep our code stable because others (and hopefully you too) will work on making the Terranova package using the latest changes of Terraform Go code.</p>
+<p>Saying this, I invite you to help us to improve Terranova. If you find a bug or want to have a new feature, please, create a Pull Request and we&rsquo;ll include it.</p>
 <p>This is not the last post about this topic, next post will be about how to use the Hashicorp Terraform Go just like Terranova uses it, and there will be a more about how to use your infrastructure code as a Go template, using Hooks to execute some actions for every Terraform activity such as logging, print output, update counters; and how to get values from your new infrastructure such as number of instances created/updated, IP or DNS addresses.</p>
 
 

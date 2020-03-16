@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.64.0" />
 
   <title>Lessons Learned: Devendorize and Modularize a Go Project &middot; Johandry&#39;s Blog</title>
 
@@ -275,13 +275,13 @@
 </div>
 
   <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">Conclusions</span>()
-</code></pre></div><p>This week I've been working on remove all the vendors of a massive Go project and make it use Go modules. It's not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.</p>
+</code></pre></div><p>This week I&rsquo;ve been working on remove all the vendors of a massive Go project and make it use Go modules. It&rsquo;s not an easy task considering that it depends of almost 400 packages, many of such packages with different versions and using packages from Terraform and Kubernetes that are also massive consumers of external packages and provides a large amount of them.</p>
 <p>Here are my lessons learned in the process of devendorize and modularize a Go project.</p>
 <h2 id="1-get-a-backup-of-your-vendor-directory">1. Get a backup of your vendor directory</h2>
-<p>The first step to devendorize is to remove the vendor directory after taking a backup of it, do not get rid of it, you may need it later if things goes wrong and things can go wrong very easily. Go modules are great and good for your projects but it's not completely mature yet. So, I suggest to take a backup of your precious vendors.</p>
+<p>The first step to devendorize is to remove the vendor directory after taking a backup of it, do not get rid of it, you may need it later if things goes wrong and things can go wrong very easily. Go modules are great and good for your projects but it&rsquo;s not completely mature yet. So, I suggest to take a backup of your precious vendors.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mv ./vendor/ /some/where/else/
 </code></pre></div><h2 id="2-use-a-clean-environment">2. Use a clean environment</h2>
-<p>This is a very important step. Your code may compile due to packages or modules already in your development environment. It's important to get rid of them to make sure that your code is going to compile  in your environment and the environment of other developers or contributors.</p>
+<p>This is a very important step. Your code may compile due to packages or modules already in your development environment. It&rsquo;s important to get rid of them to make sure that your code is going to compile  in your environment and the environment of other developers or contributors.</p>
 <p>There are different ways to use or get a clean environment to work with modules:</p>
 <h3 id="21-remove-your-packages-and-modules">2.1 Remove your packages and modules</h3>
 <p>This is an action that I recommend you do very carefully or you may be deleting your own code or version of packages that you want to keep in your computer.</p>
@@ -291,7 +291,7 @@
 <p>Then delete all your packages downloaded in the pre-modules time, those that <code>go get</code> downloaded to <code>$GOPATH/src</code>. Now, this part has to be done carefully.</p>
 <p>Most of the time I have my code in the <code>$GOPATH/src</code> directory, for example, this blog is in <code>$GOPATH/src/github.com/johandry/blog</code>. If this is a practice that you follow I recommend to delete every directory one by one, carefully, unless you have it all in sync with your CVS (i.e. Github).</p>
 <h3 id="22-use-a-different-gopath">2.2 Use a different GOPATH</h3>
-<p>This may be the quicker way to have a clean environment but it's just temporal, so use it when you want to prove something really quick and don't want to modify your dev environment.</p>
+<p>This may be the quicker way to have a clean environment but it&rsquo;s just temporal, so use it when you want to prove something really quick and don&rsquo;t want to modify your dev environment.</p>
 <p>Define a new GOPATH variable pointing to a temporal directory. All you do after exporting the new GOPATH is isolated from your regular Go development environment. However it is not 100% isolated, you may have  environment variables or files that cause some noice.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export GOPATH<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>mktemp -d<span style="color:#66d9ef">)</span>
 </code></pre></div><p>This is going to create a temporal directory and assign GOPATH to it. Everything you do after this line, in the same shell session, will happen in this directory. So, new modules, new packages, new binaries will be there.</p>
@@ -300,7 +300,7 @@
 go clean -modcache
 rm -rf $GOPATH
 </code></pre></div><h3 id="23-using-docker">2.3 Using Docker</h3>
-<p>This may be the best way to isolate a development environment, it's 100% isolated, reproducible and you can share it with your co-workers and contributors.</p>
+<p>This may be the best way to isolate a development environment, it&rsquo;s 100% isolated, reproducible and you can share it with your co-workers and contributors.</p>
 <p>This is an example of a Dockerfile used to get the modules and build the application:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Base image to load all the dependencies and modules</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang AS base</span><span style="color:#960050;background-color:#1e0010">
@@ -370,11 +370,11 @@ go mod tidy
 <p>These 2 files (<code>go.[mod|sum]</code>) contain all the information about the required modules, like the version to download.</p>
 <p>The <code>go.mod</code> file is the one we are going to modify (manually or with Go tools) and it has 2 important sections or directives: <code>require</code> and <code>replace</code>.</p>
 <p>The section or directive <code>require</code> is usually generated automatically and list all the modules and the version required by the application.</p>
-<p>The section or directive <code>replace</code> is usually added manually and it's used to modify the module parameters (name, path or version) before download it.</p>
+<p>The section or directive <code>replace</code> is usually added manually and it&rsquo;s used to modify the module parameters (name, path or version) before download it.</p>
 <h2 id="4-update-the-modules-list">4. Update the modules list</h2>
 <p>One of the daily activities with modules is to update the list. To do this, use the command:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod tidy
-</code></pre></div><p>Use the  <code>go mod tidy</code> command when you import a new package so it will be inserted in the <code>go.mod</code> file and this will also remove all the modules/packages that are not in use. It's important to execute <code>go mod tidy</code> after every modification to the <code>go.mod</code> file.</p>
+</code></pre></div><p>Use the  <code>go mod tidy</code> command when you import a new package so it will be inserted in the <code>go.mod</code> file and this will also remove all the modules/packages that are not in use. It&rsquo;s important to execute <code>go mod tidy</code> after every modification to the <code>go.mod</code> file.</p>
 <p>You can also list all the used modules and its dependencies with:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go list -m all
 go list -m -versions &lt;module&gt;
@@ -401,10 +401,10 @@ open graph.png
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">replace</span> <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">Sirupsen</span><span style="color:#f92672">/</span><span style="color:#a6e22e">logrus</span> =&gt; <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">sirupsen</span><span style="color:#f92672">/</span><span style="color:#a6e22e">logrus</span> <span style="color:#a6e22e">v1</span><span style="color:#ae81ff">.2</span><span style="color:#ae81ff">.0</span>
 </code></pre></div><p>Or execute:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go mod edit -replace github.com/Sirupsen/logrus<span style="color:#f92672">=</span>github.com/sirupsen/logrus@v1.2.0
-</code></pre></div><p>Why version <code>v1.2.0</code>? Well, any version higher that <code>v1.0.0</code> would work, and that's because this was the first release using the lowercase. If version <code>v1.2.0</code> cause conflicts, then try a different one higher than <code>v1.0.0</code>. Check it out in the <a href="https://github.com/sirupsen/logrus/blob/v1.2.0/CHANGELOG.md#100">changelog</a>.</p>
+</code></pre></div><p>Why version <code>v1.2.0</code>? Well, any version higher that <code>v1.0.0</code> would work, and that&rsquo;s because this was the first release using the lowercase. If version <code>v1.2.0</code> cause conflicts, then try a different one higher than <code>v1.0.0</code>. Check it out in the <a href="https://github.com/sirupsen/logrus/blob/v1.2.0/CHANGELOG.md#100">changelog</a>.</p>
 <p>As mentioned before, run <code>go mod tidy</code> to cleanup, update, generate the <code>go.sum</code> and download the modules.</p>
 <h2 id="6-find-the-right-version">6. Find the right version</h2>
-<p>Some errors are caused by using the lates and/or incorrect version of a module. To identify this situation you need to analyze the build logs. Let's see a couple of examples:</p>
+<p>Some errors are caused by using the lates and/or incorrect version of a module. To identify this situation you need to analyze the build logs. Let&rsquo;s see a couple of examples:</p>
 <p>My code is using the latest version of Kubernetes so instead of using version <code>v1.16</code>, this caused the compilation error:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">does not contain package k8s.io/kubernetes/pkg/kubectl/validation
 </code></pre></div><p>This was fixed switching to version <code>v1.15</code> by adding to the <code>require</code> section the line <code>k8s.io/kubernetes v1.15.0</code> or executing:</p>
@@ -415,7 +415,7 @@ open graph.png
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">hashicorp</span><span style="color:#f92672">/</span><span style="color:#a6e22e">terraform</span> =&gt; <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">hashicorp</span><span style="color:#f92672">/</span><span style="color:#a6e22e">terraform</span> <span style="color:#a6e22e">v0</span><span style="color:#ae81ff">.11</span><span style="color:#ae81ff">.14</span>
 </code></pre></div><h2 id="7-use-the-commit-hash">7. Use the commit hash</h2>
 <p>Sometimes the version number is not easy to identify or not possible at all. In such cases try to find the last commit hash for the given tag, release, or pull request with the package version you need.</p>
-<p>For example, Kubernetes uses to replace the package path with a path inside the repository, so it's not possible to find the version number. Go to the repository of this package, locate the tag or release used by the Kubernetes version you need and locate the commit hash number in the right upper corner. It's better if you get the entire hash number.</p>
+<p>For example, Kubernetes uses to replace the package path with a path inside the repository, so it&rsquo;s not possible to find the version number. Go to the repository of this package, locate the tag or release used by the Kubernetes version you need and locate the commit hash number in the right upper corner. It&rsquo;s better if you get the entire hash number.</p>
 <p>With the hash number add into the replace section the line: <code>&lt;module name&gt;[@version] =&gt; &lt;module name&gt; &lt;hash number&gt;</code>. For example:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> =&gt; <span style="color:#a6e22e">k8s</span>.<span style="color:#a6e22e">io</span><span style="color:#f92672">/</span><span style="color:#a6e22e">api</span> <span style="color:#ae81ff">7</span><span style="color:#a6e22e">cf5895f2711098d7d9527db0a4a49fb0dff7de2</span>
 </code></pre></div><p>After executing <code>go mod tidy</code> the hash will be replaced by <code>v0.0.0-20190620084959-7cf5895f2711</code> getting  this:</p>
@@ -436,7 +436,7 @@ open graph.png
 </code></pre></div><p>This replace directive will use modules that are in the repository or outside of it, the path could be absolute or relative to the <code>go.mod</code> file.</p>
 <p>As you have already figure it out, this can be used for other purpose &hellip;</p>
 <h2 id="11-developingtesting-local-modules">11. Developing/testing local modules</h2>
-<p>If it is possible to replace a module path for a local directory, then this can be used to reference local modules that I'm developing or testing or verifying some modification.</p>
+<p>If it is possible to replace a module path for a local directory, then this can be used to reference local modules that I&rsquo;m developing or testing or verifying some modification.</p>
 <p>So, clone the repository of the module you are working either in the same parent directory of your repo or in an internal directory of your repo (i.e. <code>./internal/</code> or <code>../../foo/</code>), make sure you create all the directories that are in the package name and add a line like the following, assuming the <code>go.mod</code> file is in <code>github.acme.com/kraken/app/go.mod</code>.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span> =&gt; .<span style="color:#f92672">/</span><span style="color:#a6e22e">internal</span><span style="color:#f92672">/</span><span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">kraken</span><span style="color:#f92672">/</span><span style="color:#a6e22e">azure</span>
 <span style="color:#a6e22e">github</span>.<span style="color:#a6e22e">acme</span>.<span style="color:#a6e22e">com</span><span style="color:#f92672">/</span><span style="color:#a6e22e">foo</span><span style="color:#f92672">/</span><span style="color:#a6e22e">aws</span> =&gt; ..<span style="color:#f92672">/</span>..<span style="color:#f92672">/</span><span style="color:#a6e22e">foo</span><span style="color:#f92672">/</span><span style="color:#a6e22e">aws</span>
@@ -456,7 +456,7 @@ open graph.png
 </code></pre><h2 id="14-repeat-and-compare">14. Repeat and compare</h2>
 <p>To me this sounds stupid but while I was writing this article I remove all the vendors and module files (after taking a backup of course) and repeat the entire process of modularize my project. Turns out that I got a different <code>go.mod</code>. This may be (if you do it weeks or months later) because the Go tooling was improved or some modules were improved too. Or just because I followed a different path, maybe I selected a different version for a module that required different versions of other modules and so on.</p>
 <p>Anyways, now with multiple versions of modules I can compare them and choose the best according to my needs.</p>
-<p>So, bottom line, you won't get the same results always modularizing your Go project. And,</p>
+<p>So, bottom line, you won&rsquo;t get the same results always modularizing your Go project. And,</p>
 <h2 id="is-devendoring-really-necessary">Is devendoring really necessary?</h2>
 <p>Now you move everything into modules and you can remove the <code>./vendor/</code> directory but, is this always really necessary?</p>
 <p>No, there are projects that use modules and still have the <code>./vendor/</code> directory. This may be have a full control of all the dependencies to avoid a malicious changes, or to make the build process easier or more stable, or because they do not care about the size of the repository. Whatever may be your reason, it is not a bad practice, <strong>yet</strong>.</p>
@@ -473,7 +473,7 @@ open graph.png
 <li>Update your modules files periodically and during the process using <code>go mod tidy</code>.</li>
 <li>Pay attention to <code>sirupsen/logrus</code> packages</li>
 <li>Requires patience and experience to find the right module version. Search online for the solution or go directly into the code of the modules to identify it.</li>
-<li>Don't be afraid to use the commit hash numbers, it's a good option to let <code>go mod</code> identify the right version for you.</li>
+<li>Don&rsquo;t be afraid to use the commit hash numbers, it&rsquo;s a good option to let <code>go mod</code> identify the right version for you.</li>
 <li>Use other <code>go.mod</code> files to find the right package version</li>
 <li>Use <code>GOPRIVATE</code> when you have corporate or private modules</li>
 <li>Use <code>replace</code> to a local module when you are developing or testing a module</li>
@@ -485,7 +485,7 @@ open graph.png
 <ol>
 <li>Make sure the modules will work on other computers or environments. Test locally using a clean environment, ask other co-worker or contributor to review and test your code, and make sure to update your CI/CD tool to test the modules.</li>
 <li>Do maintenance periodically executing <code>go mod tidy</code> and when there are changes to the code.</li>
-<li>Repeat all the process when it's time to upgrade a module.</li>
+<li>Repeat all the process when it&rsquo;s time to upgrade a module.</li>
 </ol>
 <p>Let us know in your comments if you have other experience, best practices or tips to share during the process of devendorizing and modularizing your Go project.</p>
 

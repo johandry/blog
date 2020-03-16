@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.64.0" />
 
   <title>Free Kubernetes Clusters for Development and Learning &middot; Johandry&#39;s Blog</title>
 
@@ -277,7 +277,7 @@
 </div>
 
   <p>When we are either developing on Kubernetes or learning Kubernetes, we need access to free Kubernetes clusters. Most of these options are not even close to the production environment but they work for most of the scenarios.</p>
-<p>In this post I'll show you 6 possible Kubernetes cluster that you can use for some development and Kubernetes learning. I will divide these clusters in 2 groups:</p>
+<p>In this post I&rsquo;ll show you 6 possible Kubernetes cluster that you can use for some development and Kubernetes learning. I will divide these clusters in 2 groups:</p>
 <p><strong>Online clusters</strong>: These are clusters that are available on internet for free with some limitations but also some good advantage versus the local clusters such as having multiple nodes.</p>
 <ol>
 <li><a href="https://www.katacoda.com/courses/kubernetes/playground">Katacoda</a></li>
@@ -292,23 +292,23 @@
 <h2 id="katacoda">Katacoda</h2>
 <p><a href="https://www.katacoda.com">Katacoda</a> is an interactive learning platform. It offers multiple learning platforms such as Kubernetes, Docker, OpenShift, Hashicorp tools, Jenkins, Ansible, Machine Learning, Go and many others.</p>
 <p>You can learn Kubernetes and many other services following the published trainings. You can also create your own trainings or sessions and publish them on Katacoda from your GitHub repository.</p>
-<p>One of the learning platforms is a Kubernetes playground with two nodes (master and worker), to open it go to <a href="https://www.katacoda.com/courses/kubernetes/playground,">https://www.katacoda.com/courses/kubernetes/playground,</a> then click on Start Scenario and execute in the <code>master</code> node the script <code>launch.sh</code>. When the script ends, the cluster is ready to be used. It's possible to open extra terminals and open a browser to the exposed services. To terminate the session, click on <code>Continue</code>.</p>
-<p>This playground has only a 1x1 cluster but it's possible to have cluster with multiple masters and workers. It's also possible to have multiple hosts and build a custom Kubernetes cluster with <code>kubeadm</code>.</p>
-<p>With Katacoda you can expose services and access them with a new tab to view the host on the exposed port. Regarding Persistent Volumes you can create local PV's on the hosts and it's possible to simulate NFS or provide storage in S3 with some Docker containers.</p>
-<p>Let's try some examples starting the <a href="https://www.katacoda.com/courses/kubernetes/playground">Kubernetes Playground</a> scenario and executing the following commands:</p>
+<p>One of the learning platforms is a Kubernetes playground with two nodes (master and worker), to open it go to <a href="https://www.katacoda.com/courses/kubernetes/playground,">https://www.katacoda.com/courses/kubernetes/playground,</a> then click on Start Scenario and execute in the <code>master</code> node the script <code>launch.sh</code>. When the script ends, the cluster is ready to be used. It&rsquo;s possible to open extra terminals and open a browser to the exposed services. To terminate the session, click on <code>Continue</code>.</p>
+<p>This playground has only a 1x1 cluster but it&rsquo;s possible to have cluster with multiple masters and workers. It&rsquo;s also possible to have multiple hosts and build a custom Kubernetes cluster with <code>kubeadm</code>.</p>
+<p>With Katacoda you can expose services and access them with a new tab to view the host on the exposed port. Regarding Persistent Volumes you can create local PV&rsquo;s on the hosts and it&rsquo;s possible to simulate NFS or provide storage in S3 with some Docker containers.</p>
+<p>Let&rsquo;s try some examples starting the <a href="https://www.katacoda.com/courses/kubernetes/playground">Kubernetes Playground</a> scenario and executing the following commands:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kubectl run www --image<span style="color:#f92672">=</span>nginx --restart<span style="color:#f92672">=</span>Never
 kubectl expose po www --type<span style="color:#f92672">=</span>NodePort --port<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>
 kubectl get po,svc www
 curl <span style="color:#66d9ef">$(</span>kubectl get svc www -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{ .spec.clusterIP }&#39;</span><span style="color:#66d9ef">)</span>
 <span style="color:#75715e"># Print the nodePort exposing the service</span>
 kubectl get svc www -o jsonpath<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;{ .spec.ports[*].nodePort }{&#34;\n&#34;}&#39;</span>
-</code></pre></div><p>The last command prints the node port exposing the service (i.e. <code>31870</code>), highlight and copy the port, click on the <code>+</code> sign next to the <code>Terminal Host 1</code> tab to select <code>Select port to view on Host 1</code>, paste the copied port and click on <code>Display Port</code> button. You'll see the web page published by Nginx in the pod/service <code>www</code>.</p>
+</code></pre></div><p>The last command prints the node port exposing the service (i.e. <code>31870</code>), highlight and copy the port, click on the <code>+</code> sign next to the <code>Terminal Host 1</code> tab to select <code>Select port to view on Host 1</code>, paste the copied port and click on <code>Display Port</code> button. You&rsquo;ll see the web page published by Nginx in the pod/service <code>www</code>.</p>
 <h2 id="play-with-kubernetes">Play with Kubernetes</h2>
-<p>Play with Kubernetes is a lab provided by Docker and it's another playground. They also offer a Kubernetes training for beginners but it's not like Katacoda which offer more topics and the community can publish their own trainings.</p>
+<p>Play with Kubernetes is a lab provided by Docker and it&rsquo;s another playground. They also offer a Kubernetes training for beginners but it&rsquo;s not like Katacoda which offer more topics and the community can publish their own trainings.</p>
 <p>To access the playground, go to <a href="http://labs.play-with-k8s.com/">http://labs.play-with-k8s.com/</a> and click on Start after login in. Then create as many instances as you need.</p>
 <p>Initialize the cluster from the master (the first node) using <code>kubeadm</code> executing the first printed instruction. When <code>kubeadm init</code> finishes it prints a <code>kubeadm join</code> instruction, execute it in the following worker nodes.</p>
 <p>When you are done, click on <code>Close Session</code>.</p>
-<p>Play with Kubernetes is not bad but Katacoda is simpler when it's time to create the cluster and more reliable, while using Play with Kubernetes I lost the session and lost all the job done. Also, Play with Kubernetes has a session that expire in 4 hrs.</p>
+<p>Play with Kubernetes is not bad but Katacoda is simpler when it&rsquo;s time to create the cluster and more reliable, while using Play with Kubernetes I lost the session and lost all the job done. Also, Play with Kubernetes has a session that expire in 4 hrs.</p>
 <h2 id="minikube">Minikube</h2>
 <p>Minikube was the first local Kubernetes cluster for developers, it starts a single node Kubernetes cluster on a VM. Minikube works on Linux, MacOS and Windows.</p>
 <p>To install Minikube on Mac, execute <code>brew install minikube</code>, for Linux or Windows go to <a href="https://minikube.sigs.k8s.io/docs/start/">https://minikube.sigs.k8s.io/docs/start/</a></p>
@@ -328,7 +328,7 @@ kubectl expose deployment nginx --type<span style="color:#f92672">=</span>NodePo
 minikube service nginx
 minikube stop
 </code></pre></div><h2 id="kubernetes-on-docker-desktop">Kubernetes on Docker Desktop</h2>
-<p>The current version of Docker Desktop (MacOS and Windows) is bundled with Kubernetes. To start it go to the Docker preferences &gt; Kubernetes and Enable Kubernetes. It will take some time the first time but then you'll have Kubernetes on your machine for free.</p>
+<p>The current version of Docker Desktop (MacOS and Windows) is bundled with Kubernetes. To start it go to the Docker preferences &gt; Kubernetes and Enable Kubernetes. It will take some time the first time but then you&rsquo;ll have Kubernetes on your machine for free.</p>
 <p>The advantage of Kubernetes on Docker Desktop over Minikube is that most of us already have Docker to build our containers, so that means that we already have Kubernetes and there is no need to install something else. The disadvantage is that there is no Docker Desktop on Linux, so our only option there is Minikube. The other main disadvantage is that Minikube usually runs the latest version of Kubernetes, Kubernetes on Docker does not.</p>
 <p>Something important with Docker Desktop is to select the correct directories for local volumes. These should be in the list of shared files. Go to Preferences &gt; File Sharing and add the directories you would like to use for local volumes.</p>
 <p>Example:</p>
@@ -338,8 +338,8 @@ kubectl get services -o wide
 PORT<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>kubectl get services nginx -o wide | grep nginx | awk <span style="color:#e6db74">&#39;{print $5}&#39;</span> | cut -f2 -d: | cut -f1 -d/<span style="color:#66d9ef">)</span>
 open http://localhost:$PORT
 </code></pre></div><h2 id="kind-or-kubernetes-in-docker">KinD or Kubernetes in Docker</h2>
-<p>KinD is kind of new but it's an amazing and lighter Kubernetes cluster. It's often used in Travis to test your Microservices on Docker.</p>
-<p>According to the authors, KinD cannot be used in production, it was not made to provide a stable Kubernetes cluster but it's incredible for development, testing and learning.</p>
+<p>KinD is kind of new but it&rsquo;s an amazing and lighter Kubernetes cluster. It&rsquo;s often used in Travis to test your Microservices on Docker.</p>
+<p>According to the authors, KinD cannot be used in production, it was not made to provide a stable Kubernetes cluster but it&rsquo;s incredible for development, testing and learning.</p>
 <p>If you have Go in your system, it can be installed with <code>GO111MODULE=&quot;on&quot; go get sigs.k8s.io/kind</code>. If not, go to <a href="https://github.com/kubernetes-sigs/kind">https://github.com/kubernetes-sigs/kind</a> and follow the installation instructions for your OS.</p>
 <p>The common workflow to use KinD is:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">kind create cluster
@@ -356,10 +356,10 @@ open http://localhost:8080
 <p>These are not the only options, there are more such as <a href="https://github.com/ubuntu/microk8s">MicroK8s</a>, <a href="https://github.com/kinvolk/kube-spawn">Kube-spawn</a> and maybe others.</p>
 <p>You can also create your own Kubernetes cluster using Vagrant and kubeadm, the project <a href="https://github.com/johandry/KoV">KoV</a> create a MxW cluster using a single Vagrant file. You can use it or copy it to your needs, and there are many other similar projects in GitHub.</p>
 <h2 id="conclusion">Conclusion</h2>
-<p>If you need to publish a training or a post about Kubernetes, my first option would be to use Katacoda. It's also useful if you don't have your laptop near or using a mobile device like an iPad or Chrome.</p>
-<p>If you are using Windows or Mac, my first option would be to use Docker Desktop. You also need Docker to work with your images and containers, so you already have Kubernetes and it's very stable for me so far.</p>
+<p>If you need to publish a training or a post about Kubernetes, my first option would be to use Katacoda. It&rsquo;s also useful if you don&rsquo;t have your laptop near or using a mobile device like an iPad or Chrome.</p>
+<p>If you are using Windows or Mac, my first option would be to use Docker Desktop. You also need Docker to work with your images and containers, so you already have Kubernetes and it&rsquo;s very stable for me so far.</p>
 <p>If you want something to run on any OS (Mac, Windows and Linux), my first option would be KinD, then MiniKube.</p>
-<p>To learn how to create a cluster from scratch, I'd recommend using Vagrant with <code>kubeadm</code>.</p>
+<p>To learn how to create a cluster from scratch, I&rsquo;d recommend using Vagrant with <code>kubeadm</code>.</p>
 <p>These are my suggestions for a free Kubernetes cluster but these clusters may not be similar to your production environment, so after finish your development and some simple tests, my recommendation is to test your code in an environment similar to your production environment which may be a Kubernetes cluster on some cloud (i.e. EKS, GKS, AKS, PKS, etc&hellip;) or bare-metal.</p>
 
 

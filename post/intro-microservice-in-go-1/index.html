@@ -5,7 +5,7 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
-  <meta name="generator" content="Hugo 0.61.0" />
+  <meta name="generator" content="Hugo 0.64.0" />
 
   <title>Introduction to Microservices in Go, part 1 &middot; Johandry&#39;s Blog</title>
 
@@ -276,15 +276,15 @@
 
 </div>
 
-  <p>This is a very simple example about how to build a microservice in Go. It's meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.</p>
+  <p>This is a very simple example about how to build a microservice in Go. It&rsquo;s meant for a quick Go and Microservices tutorial series covering from the a RESTful API to gRPC on Kubernetes.</p>
 <p>The purpose of this microservice is a catalog of movies. The code is at <a href="https://github.com/johandry/micro-media-service">https://github.com/johandry/micro-media-service</a> and every section is a branch, clone the repo and change branch for every section.</p>
 <pre><code>git clone https://github.com/johandry/micro-media-service
 </code></pre>
 <h2 id="a-simple-restful-api">A simple RESTful API</h2>
-<p>Let's start with a simple RESTfull API by making a simple web server. Get this section code by checking out the branch <code>s01-restful-api</code>:</p>
+<p>Let&rsquo;s start with a simple RESTfull API by making a simple web server. Get this section code by checking out the branch <code>s01-restful-api</code>:</p>
 <pre><code>git checkout s01-restful-api
 </code></pre>
-<p>All the microservice terminal output is done using the <code>log</code> package instead of the <code>fmt</code>'s prints. So let's start this example with</p>
+<p>All the microservice terminal output is done using the <code>log</code> package instead of the <code>fmt</code>'s prints. So let&rsquo;s start this example with</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 
 <span style="color:#f92672">import</span> <span style="color:#e6db74">&#34;log&#34;</span>
@@ -322,8 +322,8 @@
 <p>The return value of <code>ListenAndServe()</code> is an error and if there is any (the error is not <code>nil</code>) it will be printed by <code>log.Fatal</code> method and exit with code 1 by calling <code>os.Exit(1)</code>. The <code>ListenAndServe()</code> method blocks the program until there is an error or someone stop it.</p>
 <p>To view your masterpiece in action, start your program with <code>go run main.go</code> and open the URL http://localhost8086/api/v1/version in a browser or with curl.</p>
 <p>What will happen if you start the program twice?</p>
-<h2 id="lets-speak-in-json">Let's speak in JSON</h2>
-<p>The output in this first example is the version number in plain text, now let's see how can we print it in JSON format. The package <code>encoding/json</code> is going to help us to encode and decode JSON to/from Go type structures using the <code>Marshal</code>,  <code>Unmarshal</code>, <code>Encoder</code> and <code>Decoder</code> functions.</p>
+<h2 id="lets-speak-in-json">Let&rsquo;s speak in JSON</h2>
+<p>The output in this first example is the version number in plain text, now let&rsquo;s see how can we print it in JSON format. The package <code>encoding/json</code> is going to help us to encode and decode JSON to/from Go type structures using the <code>Marshal</code>,  <code>Unmarshal</code>, <code>Encoder</code> and <code>Decoder</code> functions.</p>
 <p>To return the version we are going to encapsulate it in a structure (line #1 to #3), modify the global variable <code>version</code> to be of the defined <code>Version</code> type (line #5) and use the <code>init()</code> function to initialize it (line #8).</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
 <span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span>	<span style="color:#a6e22e">version</span> <span style="color:#66d9ef">string</span>
@@ -347,9 +347,9 @@
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">struct</span> {
 	<span style="color:#a6e22e">Version</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">json:&#34;version&#34;</span><span style="color:#e6db74">`</span>
 }</code></pre></div>
-<p>In this example it's ok to return the JSON in one line but if we want to print it in pretty format we use the function <code>MarshalIndent()</code> like this:</p>
+<p>In this example it&rsquo;s ok to return the JSON in one line but if we want to print it in pretty format we use the function <code>MarshalIndent()</code> like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#a6e22e">verJSON</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">MarshalIndent</span>(<span style="color:#a6e22e">version</span>, <span style="color:#e6db74">&#34;&#34;</span>, <span style="color:#e6db74">&#34;  &#34;</span>)</code></pre></div>
-<p>The main function of this microservice is to return movie objects. So, let's have a movie structure and initialize it with some testing values:</p>
+<p>The main function of this microservice is to return movie objects. So, let&rsquo;s have a movie structure and initialize it with some testing values:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Movie</span> <span style="color:#66d9ef">struct</span> {
 	<span style="color:#a6e22e">ID</span>          <span style="color:#66d9ef">int</span>      <span style="color:#e6db74">`</span><span style="color:#e6db74">json:&#34;id, string&#34;</span><span style="color:#e6db74">`</span>
 	<span style="color:#a6e22e">Title</span>       <span style="color:#66d9ef">string</span>   <span style="color:#e6db74">`</span><span style="color:#e6db74">json:&#34;title&#34;</span><span style="color:#e6db74">`</span>
@@ -374,8 +374,8 @@
 	<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/api/v1/movies&#34;</span>, <span style="color:#a6e22e">handleMovies</span>)
 	<span style="color:#f92672">...</span>
 }</code></pre></div>
-<p>If you want to see all the movies, please, get the code. It's a long list even with 5 items.</p>
-<p>We are also mapping the path <code>&quot;/api/v1/movies&quot;</code> to the handler function <code>handlerAllMovies</code> to respond all the movies in JSON but in this case we'll use the <code>Encoder</code> object from <code>encoding/json</code> that's more efficient than marshaling and return a string, so the handler function to respond all the movies looks like this:</p>
+<p>If you want to see all the movies, please, get the code. It&rsquo;s a long list even with 5 items.</p>
+<p>We are also mapping the path <code>&quot;/api/v1/movies&quot;</code> to the handler function <code>handlerAllMovies</code> to respond all the movies in JSON but in this case we&rsquo;ll use the <code>Encoder</code> object from <code>encoding/json</code> that&rsquo;s more efficient than marshaling and return a string, so the handler function to respond all the movies looks like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovies</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
 	<span style="color:#a6e22e">encoder</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">json</span>.<span style="color:#a6e22e">NewEncoder</span>(<span style="color:#a6e22e">rw</span>)
 	<span style="color:#a6e22e">encoder</span>.<span style="color:#a6e22e">Encode</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">movies</span>)
@@ -384,14 +384,14 @@
 <pre><code>curl -s http://localhost:8086/api/v1/movies | jq
 </code></pre>
 <h2 id="returning-just-one-movie">Returning just one movie</h2>
-<p>Before continue working with a single file (<code>main.go</code>) with all the code, let's first split all the code in different files. Change to the branch <code>s02-read-json</code> where you can see the files <code>main.go</code>, <code>version.go</code> and <code>movies.go</code>. Now use <code>go run *.go</code> to run the microservice.</p>
-<p>Let's create a path that receives something after <code>&quot;/movies/&quot;</code> like an ID and map it to a handler function to return the movie with that ID.</p>
+<p>Before continue working with a single file (<code>main.go</code>) with all the code, let&rsquo;s first split all the code in different files. Change to the branch <code>s02-read-json</code> where you can see the files <code>main.go</code>, <code>version.go</code> and <code>movies.go</code>. Now use <code>go run *.go</code> to run the microservice.</p>
+<p>Let&rsquo;s create a path that receives something after <code>&quot;/movies/&quot;</code> like an ID and map it to a handler function to return the movie with that ID.</p>
 <p>In <code>main.go</code>:
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
   <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandleFunc</span>(<span style="color:#e6db74">&#34;/api/v1/movies/&#34;</span>, <span style="color:#a6e22e">handleMovieFromID</span>)
   <span style="color:#f92672">...</span>
 }</code></pre></div></p>
-<p>In <code>movies.go</code> we create a RegEx to parse a number after <code>&quot;/movies/&quot;</code>, for this we create a compiled RegEx structure that we'll use later to find all the strings that match the pattern. If this match is a number and it is a valid ID of a movie, then respond with the movie in JSON format.</p>
+<p>In <code>movies.go</code> we create a RegEx to parse a number after <code>&quot;/movies/&quot;</code>, for this we create a compiled RegEx structure that we&rsquo;ll use later to find all the strings that match the pattern. If this match is a number and it is a valid ID of a movie, then respond with the movie in JSON format.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">reMovieID</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">regexp</span>.<span style="color:#a6e22e">Regexp</span>
 
 <span style="color:#66d9ef">func</span> <span style="color:#a6e22e">handleMovieFromID</span>(<span style="color:#a6e22e">w</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
@@ -424,9 +424,9 @@
 <li>http://localhost:8086/api/v1/movies/3</li>
 <li>http://localhost:8086/api/v1/movies/0</li>
 </ul>
-<p>All these kind of complex routes can be managed very easy with the <a href="http://www.gorillatoolkit.org/pkg/mux"><code>gorilla/mux</code></a> package. However, let's look at other way to send information to the API.</p>
-<h2 id="lets-read-json">Let's read JSON</h2>
-<p>Besides receive input data from the URL the API can receive input data in the body of the request using JSON format. To implement this let's create a struct to store the request (this may not be necessary but will make the code more human readable).</p>
+<p>All these kind of complex routes can be managed very easy with the <a href="http://www.gorillatoolkit.org/pkg/mux"><code>gorilla/mux</code></a> package. However, let&rsquo;s look at other way to send information to the API.</p>
+<h2 id="lets-read-json">Let&rsquo;s read JSON</h2>
+<p>Besides receive input data from the URL the API can receive input data in the body of the request using JSON format. To implement this let&rsquo;s create a struct to store the request (this may not be necessary but will make the code more human readable).</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">movieRequest</span> <span style="color:#66d9ef">struct</span> {
 	<span style="color:#a6e22e">Title</span> <span style="color:#66d9ef">string</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">json:&#34;title&#34;</span><span style="color:#e6db74">`</span>
 }</code></pre></div>
@@ -453,10 +453,10 @@
 curl -s http://localhost:8086/api/v1/movies -d '{&quot;title&quot;:&quot;Frankestein&quot;}'
 curl -s http://localhost:8086/api/v1/movies | jq
 </code></pre><h2 id="build-and-ship-it">Build and Ship it</h2>
-<p>It's not done yet, there are many things missing but to see this beauty running as a microservice we have to containerize it, bake it into a container. This section works with the branch <code>s03-container</code>.</p>
+<p>It&rsquo;s not done yet, there are many things missing but to see this beauty running as a microservice we have to containerize it, bake it into a container. This section works with the branch <code>s03-container</code>.</p>
 <pre><code>git checkout s03-container
 </code></pre>
-<p>We'll use Docker to create the container and multi-stage builds to create a tiny Docker image. Let's starts with a single-stage <code>Dockerfile</code> file to create a Docker image based on Alpine to build our new microservice.</p>
+<p>We&rsquo;ll use Docker to create the container and multi-stage builds to create a tiny Docker image. Let&rsquo;s starts with a single-stage <code>Dockerfile</code> file to create a Docker image based on Alpine to build our new microservice.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /app</span><span style="color:#960050;background-color:#1e0010">
@@ -474,7 +474,7 @@ curl -s http://localhost/api/v1/movies/1 | jq
 docker stop movie
 </code></pre>
 <p>As you can see we access the API on port <code>80</code> because the container expose the API on port <code>8086</code> and we map it to port <code>80</code> with the option <code>-p 80:8086</code>.</p>
-<p>The image size is <strong>276MB</strong> (we can see this with <code>docker images</code>) it's considerable smaller compared with the <strong>718MB</strong> of an image based on Debian Jessie (try it replacing <code>FROM golang:alpine</code> by <code>FROM golang:1.8-jessie</code>) and we should make it smaller because in containers, size matters. Let's start with changing to a multi-stage build by replacing the <code>Dockerfile</code></p>
+<p>The image size is <strong>276MB</strong> (we can see this with <code>docker images</code>) it&rsquo;s considerable smaller compared with the <strong>718MB</strong> of an image based on Debian Jessie (try it replacing <code>FROM golang:alpine</code> by <code>FROM golang:1.8-jessie</code>) and we should make it smaller because in containers, size matters. Let&rsquo;s start with changing to a multi-stage build by replacing the <code>Dockerfile</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine AS build</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
@@ -493,7 +493,7 @@ docker stop movie
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8086</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;./movie&#34;</span> ]</code></pre></div>
-<p>If you build, run, test and destroy the container with the same instructions you get the same results but the big difference is the size of the image, it's now <strong>10.6MB</strong>. In this example we are using Alpine but you can get the same size replacing it with Debian Stretch (<code>FROM golang:stretch</code>)</p>
+<p>If you build, run, test and destroy the container with the same instructions you get the same results but the big difference is the size of the image, it&rsquo;s now <strong>10.6MB</strong>. In this example we are using Alpine but you can get the same size replacing it with Debian Stretch (<code>FROM golang:stretch</code>)</p>
 <p>Can we make it smaller?</p>
 <p>Yes, we can build the image from Scratch instead of Apline but not all the applications can support it. Some Go applications require libraries that are not provided using Scratch but in this yet simple microservice we can do it. Replace the Go build line to <code>CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /movie</code> and the <code>FROM</code> instruction in the second stage to <code>FROM scratch</code>.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
@@ -516,8 +516,8 @@ docker stop movie
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;./movie&#34;</span> ]</code></pre></div>
 <p>The size of the image: <strong>6.62MB</strong></p>
 <p>But wait, it can be smaller. We can use the build ldflags <code>&quot;-s -w&quot;</code> to omit the symbol table and debug information to reduce the size of the binary. If we add to the build line the parameter <code>-ldflags=&quot;-s -w&quot;</code> we can have an image of <strong>4.54MB</strong>.</p>
-<p>Do you want to see something crazy? We can make it even more smaller but this change comes with a performance cost. According to this <a href="https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/">article</a> we can use <a href="https://upx.github.io"><code>upx</code></a> to create a self-extracting compressed file but there is an overhead when the process starts. If you realy need a small container and it's rarely executed then this may be a good option for you.</p>
-<p>Let's see the new Docker file using the ldflags and <code>upx</code>:</p>
+<p>Do you want to see something crazy? We can make it even more smaller but this change comes with a performance cost. According to this <a href="https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/">article</a> we can use <a href="https://upx.github.io"><code>upx</code></a> to create a self-extracting compressed file but there is an overhead when the process starts. If you realy need a small container and it&rsquo;s rarely executed then this may be a good option for you.</p>
+<p>Let&rsquo;s see the new Docker file using the ldflags and <code>upx</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># Build stage</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> golang:alpine AS build</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#960050;background-color:#1e0010">
@@ -542,13 +542,13 @@ docker stop movie
 <p>Will take some time to build the image, around 2 minutes in this example, but the final result is amazing.</p>
 <p>The final size of the image: <strong>1.26MB</strong>!</p>
 <p>We went from a 718MB single-stage image based on Debian Jessie to a 1.26MB multi-stage image based on Scratch, using the ldflags <code>&quot;-s -w&quot;</code> and UPX compression.</p>
-<p>In a next post about gRPC and Kubernetes, we'll use this and other containers interacting.</p>
+<p>In a next post about gRPC and Kubernetes, we&rsquo;ll use this and other containers interacting.</p>
 <h2 id="one-more-thing-">One more thing &hellip;</h2>
-<p>Before go to the next post I'd like to add to this microservice the option to configure it. This is a simple code so there isn't much to configure but let's give it the option to run in verbose mode.</p>
-<p>Besides the build-in <code>log</code> package, there are many others like <a href="https://github.com/sirupsen/logrus"><code>logrus</code></a> and <a href="https://github.com/golang/glog"><code>glog</code></a>. I have a preference for <code>logrus</code> so instead of implement my own,  I'll use it in this example. If you don't have it, get this package with</p>
+<p>Before go to the next post I&rsquo;d like to add to this microservice the option to configure it. This is a simple code so there isn&rsquo;t much to configure but let&rsquo;s give it the option to run in verbose mode.</p>
+<p>Besides the build-in <code>log</code> package, there are many others like <a href="https://github.com/sirupsen/logrus"><code>logrus</code></a> and <a href="https://github.com/golang/glog"><code>glog</code></a>. I have a preference for <code>logrus</code> so instead of implement my own,  I&rsquo;ll use it in this example. If you don&rsquo;t have it, get this package with</p>
 <pre><code>go get github.com/sirupsen/logrus
 </code></pre>
-<p>Modify the <code>main.go</code> to define and get the flag <code>--verbose</code>, and get the value of the environment variable <strong><code>MOVIE_VERBOSE</code></strong> in lowercase. If the environment variable is <code>&quot;true&quot;</code> or if the flag <code>--debug</code> is used, then set the debug log level. This means that when I use the logrus function <code>Debug()</code>, <code>Debugf()</code> or <code>Debugln()</code> it will print the message, otherwise it won't because the default log level is Info.</p>
+<p>Modify the <code>main.go</code> to define and get the flag <code>--verbose</code>, and get the value of the environment variable <strong><code>MOVIE_VERBOSE</code></strong> in lowercase. If the environment variable is <code>&quot;true&quot;</code> or if the flag <code>--debug</code> is used, then set the debug log level. This means that when I use the logrus function <code>Debug()</code>, <code>Debugf()</code> or <code>Debugln()</code> it will print the message, otherwise it won&rsquo;t because the default log level is Info.</p>
 <p>As logrus is API-compatible with the standard <code>log</code> package we can create the alias <code>log</code> to <code>logrus</code> by replacing the import of log to:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang">    <span style="color:#a6e22e">log</span> <span style="color:#e6db74">&#34;github.com/sirupsen/logrus&#34;</span></code></pre></div>
 <p>And add to <code>main.go</code> the following lines:</p>
@@ -601,7 +601,7 @@ curl http://localhost:8086/api/v1/version
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;./movie&#34;</span> ]</code></pre></div>
 <p>You can modify the <code>formatter</code> to change the output format or create your own. (<a href="https://github.com/johandry/log/blob/master/text_formatter.go">here</a> is an example)</p>
 <p>I also recommend to use the <a href="https://github.com/spf13/viper"><strong>Viper</strong></a> and <a href="https://github.com/spf13/cobra"><strong>Cobra</strong></a> packages to implement the configuration of your Go programs. Viper manage the settings from environment variables and configuration files (yaml, json, toml and others). Cobra manage the parameters and flags. Both have the same author and play very well together.</p>
-<p>Stay in tune for the next post to cover gRPC and Kubernetes. I'll update this line as soon as I have it.</p>
+<p>Stay in tune for the next post to cover gRPC and Kubernetes. I&rsquo;ll update this line as soon as I have it.</p>
 
 
   
