@@ -71,7 +71,7 @@ data:
 
 If these were the requirements then problem solved. To create/update known resources you just need to:
 
-1. Create the `config` from the kubeconfig file 
+1. Create the `config` from the kubeconfig file
 2. Create the `clientset` from the `config`
 3. Create the resource(s) (`configMap`) using the appropriate API structure (`core/v1` and `meta/v1`)
 4. Identify if the resource exists using `Get()` and the right resource method. If it exist, use `Create()`, otherwise use `Update()`
@@ -109,11 +109,11 @@ The first and the foundation for all the other methods is the `ClientConfig`, to
 
 ```go
 func (f *factory) ToRawKubeConfigLoader() clientcmd.ClientConfig {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	loadingRules.DefaultClientConfig = &clientcmd.DefaultClientConfig
+  loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+  loadingRules.DefaultClientConfig = &clientcmd.DefaultClientConfig
   loadingRules.ExplicitPath = f.KubeConfig
   configOverrides := &clientcmd.ConfigOverrides{
-		ClusterDefaults: clientcmd.ClusterDefaults,
+    ClusterDefaults: clientcmd.ClusterDefaults,
     CurrentContext:  f.Context,
   }
 
@@ -154,7 +154,7 @@ The client also store some important information used along the way such as the 
 ```go
 type Client struct {
   Clientset        *kubernetes.Clientset
-	factory          *factory
+  factory          *factory
   namespace        string
   enforceNamespace bool
 }
@@ -166,7 +166,7 @@ In the client we have some helpers to return the `Result` from the `Builder`. Ba
 result := c.factory.
   NewBuilder().
   Unstructured().                                       // Only if required
-  Schema(validation.NullSchema{}).											// Do not validate the code
+  Schema(validation.NullSchema{}).                      // Do not validate the code
   ContinueOnError().
   NamespaceParam(c.namespace).
   DefaultNamespace().
@@ -181,9 +181,9 @@ As the methods `Unstructured()`, `FilenameParam()` and `Stream()` are not always
 ```go
 func (c *Client) ResultForReader(r io.Reader, unstructured bool) *resource.Result {
   b := c.factory.NewBuilder()
-	if opt.Unstructured {
-		b = b.Unstructured()
-	}
+  if opt.Unstructured {
+    b = b.Unstructured()
+  }
 
   return b.
     Stream(r, "").
@@ -192,20 +192,20 @@ func (c *Client) ResultForReader(r io.Reader, unstructured bool) *resource.Resul
 }
 
 func (c *Client) ResultForFilenameParam(filenames []string, unstructured bool) *resource.Result {
-	filenameOptions := &resource.FilenameOptions{
-		Recursive: false,
-		Filenames: filenames,
-	}
+  filenameOptions := &resource.FilenameOptions{
+    Recursive: false,
+    Filenames: filenames,
+  }
   
   b := c.factory.NewBuilder()
-	if unstructured {
-		b = b.Unstructured()
-	}
+  if unstructured {
+    b = b.Unstructured()
+  }
 
-	return b.
+  return b.
     FilenameParam(f.enforceNamespace, filenameOptions).
-		Flatten().
-		Do()
+    Flatten().
+    Do()
 }
 ```
 
@@ -236,7 +236,7 @@ func (c *Client) CreateNamespace(namespace string) error {
 }
 
 func (c *Client) DeleteNamespace(namespace string) error {
-	return c.Clientset.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{})
+  return c.Clientset.CoreV1().Namespaces().Delete(namespace, &metav1.DeleteOptions{})
 }
 ```
 
@@ -252,13 +252,13 @@ func (c *Client) Apply(content []byte) error {
       return err
     }
     current, err := resource.NewHelper(info.Client, info.Mapping).Get(info.Namespace, info.Name, info.Export)
-		if err != nil {
-			if !errors.IsNotFound(err) {
-				return err
-			}
-			return create(info, nil)
-		}
-		return patch(info, current)
+    if err != nil {
+      if !errors.IsNotFound(err) {
+        return err
+      }
+      return create(info, nil)
+    }
+    return patch(info, current)
   })
 }
 ```
@@ -281,25 +281,25 @@ func create(info *resource.Info) error {
 }
 ```
 
-The patching is more complicated. The patching is done with the `Patch` method of the resource helper, it requires a patch which is a slices of bytes `[]byte`.  To get this patch we use `strategicpatch.CreateThreeWayMergePatch()` passing the current object in the cluster, the new object required by the user and the last applied version of such object obtained from the object annotations, all of them in JSON. This patching method is called (as the func name states) [3-way-merge patch](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge) and requires the patch type `types.StrategicMergePatchType`. To view this code, check the `patch.go` file from the repository. 
+The patching is more complicated. The patching is done with the `Patch` method of the resource helper, it requires a patch which is a slices of bytes `[]byte`.  To get this patch we use `strategicpatch.CreateThreeWayMergePatch()` passing the current object in the cluster, the new object required by the user and the last applied version of such object obtained from the object annotations, all of them in JSON. This patching method is called (as the func name states) [3-way-merge patch](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge) and requires the patch type `types.StrategicMergePatchType`. To view this code, check the `patch.go` file from the repository.
 
 Since Kubernetes 1.16 the [Service Side Patch](https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge) feature is in beta and if your cluster supports it, you basically needs the new object required by the user ni JSON and use the patch type `types.ApplyPatchType`. Then call the same `Patch` method of the resource helper.
 
 ```go
 func serverSideApply(info *resource.Info, err error) error {
-	data, err := runtime.Encode(unstructured.UnstructuredJSONScheme, info.Object)
-	if err != nil {
-		return err
-	}
-	options := metav1.PatchOptions{
-		Force:        true,
-	}
-	obj, err := resource.NewHelper(info.Client, info.Mapping).Patch(info.Namespace, info.Name, types.ApplyPatchType, data, &options)
-	if err != nil {
-		return err
-	}
-	info.Refresh(obj, true)
-	return nil
+  data, err := runtime.Encode(unstructured.UnstructuredJSONScheme, info.Object)
+  if err != nil {
+    return err
+  }
+  options := metav1.PatchOptions{
+    Force:        true,
+  }
+  obj, err := resource.NewHelper(info.Client, info.Mapping).Patch(info.Namespace, info.Name, types.ApplyPatchType, data, &options)
+  if err != nil {
+    return err
+  }
+  info.Refresh(obj, true)
+  return nil
 }
 ```
 
@@ -310,8 +310,8 @@ If any of these patches fails the last option is to delete the current object an
 ```go
 ...
   if err != nil && (errors.IsConflict(err) || errors.IsInvalid(err)) && force {
-		patchBytes, patchObject, err = deleteAndCreate(info, patchBytes)
-	}
+    patchBytes, patchObject, err = deleteAndCreate(info, patchBytes)
+  }
 ...
 ```
 
@@ -319,38 +319,37 @@ To delete the object select the `DeletePropagationForeground` policy to delete t
 
 ```go
 func deleteAndCreate(info *resource.Info, modified []byte) ([]byte, runtime.Object, error) {
-	helper := resource.NewHelper(info.Client, info.Mapping)
+  helper := resource.NewHelper(info.Client, info.Mapping)
   
   policy := metav1.DeletePropagationForeground
   delOptions := &metav1.DeleteOptions{
     PropagationPolicy: &policy
   }
   if _, err := helper.DeleteWithOptions(info.Namespace, info.Name, delOptions); err != nil {
-		return nil, nil, err
-	}
+    return nil, nil, err
+  }
 
   ...
 
-	options := metav1.CreateOptions{}
-	createdObject, err := helper.Create(info.Namespace, true, info.Object, &options)
-	if err != nil {
-		recreated, recreateErr := helper.Create(info.Namespace, true, info.Object, &options)
-		if recreateErr != nil {
-			err = fmt.Errorf("An error occurred force-replacing the existing object with the newly provided one. %v.\n\nAdditionally, an error occurred attempting to restore the original object: %v", err, recreateErr)
-		} else {
-			createdObject = recreated
-		}
-	}
-	return modified, createdObject, err
+  options := metav1.CreateOptions{}
+  createdObject, err := helper.Create(info.Namespace, true, info.Object, &options)
+  if err != nil {
+    recreated, recreateErr := helper.Create(info.Namespace, true, info.Object, &options)
+    if recreateErr != nil {
+      err = fmt.Errorf("An error occurred force-replacing the existing object with the newly provided one. %v.\n\nAdditionally, an error occurred attempting to restore the original object: %v", err, recreateErr)
+    } else {
+      createdObject = recreated
+    }
+  }
+  return modified, createdObject, err
 }
 
 ```
 
-## Conclusion 
+## Conclusion
 
 The `kubectl` CLI is great to control your Kubernetes cluster but not everything can be done with `kubectl` if you are developing in Go or other language.
 
 The  Kubernetes API is a very well designed and implemented API but still complex for some actions. It is getting simpler and simpler over time. Anytime soon we wouldn't need any kind of module to interact with them. Meanwhile, if you don't want to use the oficial Go packages from Kubernetes, feel free to use the [klient](https://github.com/johandry/klient) Go package or the Helm (`helm.sh/helm/v3/pkg/kube`) Go package.
 
 The [klient](https://github.com/johandry/klient) Go package is in use on production and will have more features to make it more appealing and useful to Go and Kubernetes application developers. If you'd like to contribute to it, please, open an issue or create a Pull Request. I'll appreciate your contribution.
-
