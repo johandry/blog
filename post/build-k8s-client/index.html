@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.64.0" />
+
+  <title>Building a Kubernetes Client in Go &middot; Johandry&#39;s Blog</title>
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="http://blog.johandry.com/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="http://blog.johandry.com/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="http://blog.johandry.com/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/vs2015.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/json.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/makefile.min.js"></script>
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/shell.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="http://blog.johandry.com/img/favicon.ico" type="image/x-icon" />
+
+  
+    
+        <link rel="stylesheet" href="http://blog.johandry.com/css/my.css">
+    
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="http://blog.johandry.com/">Johandry's</a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://blog.johandry.com/tags/"><i class='fa fa-tags fa-fw'></i>Tags</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="http://johandry.com/"><i class='fa fa-globe fa-fw'></i>Web Site</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="mailto:johandry@yahoo.com"><i class='fa fa-envelope-o fa-fw'></i>Email</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/@johandry" target="_blank"><i class="fa fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://linkedin.com/in/johandry-amador-3ba8507" target="_blank"><i class="fa fa-linkedin-square fa-fw"></i>LinkedIn</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/johandry" target="_blank"><i class="fa fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://stackoverflow.com/users/3562284" target="_blank"><i class="fa fa-stack-overflow fa-fw"></i>Stack Overflow</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2017. All rights reserved.</small>
+  </div>
+  <div class="small-print">
+    <small>Built with&nbsp;<a href="https://gohugo.io/" target="_blank">Hugo</a></small>
+    <small>Theme&nbsp;<a href="https://github.com/yoshiharuyamashita/blackburn" target="_blank">Blackburn</a></small>
+  </div>
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>Building a Kubernetes Client in Go</h1>
+  <h2></h2>
+</div>
+<div class="content">
+
+  <div class="post-meta">
+
+  <div>
+    <i class="fa fa-calendar fa-fw"></i>
+    <time>15 Mar 2020, 11:56</time>
+  </div>
+
+  
+
+  
+
+  
+  
+  
+  <div>
+    <i class="fa fa-tags fa-fw"></i>
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/go">Go</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/kubernetes">Kubernetes</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/api">API</a>&nbsp;&#47;
+    
+      <a class="post-taxonomy-tag" href="http://blog.johandry.com/tags/kubectl">kubectl</a>
+    
+  </div>
+  
+  
+
+</div>
+
+  <h1 id="building-a-kubernetes-client-in-go">Building a Kubernetes Client in Go</h1>
+<p><code>defer Conclusion()</code></p>
+<p>Now I have the task to build a Kubernetes client in Go. The requirements are something like this: having an existing Kubernetes cluster it&rsquo;s required a program to create or replace resources such as ConfigMaps, Secrets, Services and Deployments.</p>
+<p>If you know the resources to create, for example a ConfigMap, it&rsquo;s not a big deal, just use the Kubernetes clientset (<code>kubernetes.Clientset</code>) from <code>github.com/kubernetes/client-go</code> and there are plenty of examples like those in the <a href="https://github.com/kubernetes/client-go/tree/master/examples">examples</a> directory from the same package. Here is a simple example to create a ConfigMap resource:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">import</span> (
+  <span style="color:#a6e22e">corev1</span> <span style="color:#e6db74">&#34;k8s.io/api/core/v1&#34;</span>
+  <span style="color:#e6db74">&#34;k8s.io/apimachinery/pkg/api/errors&#34;</span>
+  <span style="color:#a6e22e">metav1</span> <span style="color:#e6db74">&#34;k8s.io/apimachinery/pkg/apis/meta/v1&#34;</span>
+  <span style="color:#e6db74">&#34;k8s.io/client-go/kubernetes&#34;</span>
+  <span style="color:#e6db74">&#34;k8s.io/client-go/tools/clientcmd&#34;</span>
+)
+
+<span style="color:#f92672">...</span>
+
+<span style="color:#a6e22e">config</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">BuildConfigFromFlags</span>(<span style="color:#e6db74">&#34;&#34;</span>, <span style="color:#a6e22e">kubeconfigPath</span>)
+<span style="color:#a6e22e">clientset</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">kubernetes</span>.<span style="color:#a6e22e">NewForConfig</span>(<span style="color:#a6e22e">config</span>)
+<span style="color:#a6e22e">configMapData</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">string</span>, <span style="color:#ae81ff">0</span>)
+<span style="color:#a6e22e">uiProperties</span> <span style="color:#f92672">:=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">color.good=purple
+</span><span style="color:#e6db74">color.bad=yellow
+</span><span style="color:#e6db74">allow.textmode=true
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">`</span>
+<span style="color:#a6e22e">configMapData</span>[<span style="color:#e6db74">&#34;ui.properties&#34;</span>] = <span style="color:#a6e22e">uiProperties</span>
+<span style="color:#a6e22e">configMap</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">corev1</span>.<span style="color:#a6e22e">ConfigMap</span>{
+  <span style="color:#a6e22e">TypeMeta</span>: <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">TypeMeta</span>{
+    <span style="color:#a6e22e">Kind</span>:       <span style="color:#e6db74">&#34;ConfigMap&#34;</span>,
+    <span style="color:#a6e22e">APIVersion</span>: <span style="color:#e6db74">&#34;v1&#34;</span>,
+  },
+  <span style="color:#a6e22e">ObjectMeta</span>: <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">ObjectMeta</span>{
+    <span style="color:#a6e22e">Name</span>:      <span style="color:#e6db74">&#34;game-data&#34;</span>,
+    <span style="color:#a6e22e">Namespace</span>: <span style="color:#e6db74">&#34;game&#34;</span>,
+  },
+  <span style="color:#a6e22e">Data</span>: <span style="color:#a6e22e">configMapData</span>,
+}
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cm</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">corev1</span>.<span style="color:#a6e22e">ConfigMap</span>
+<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">clientset</span>.<span style="color:#a6e22e">CoreV1</span>().<span style="color:#a6e22e">ConfigMaps</span>(<span style="color:#e6db74">&#34;game&#34;</span>).<span style="color:#a6e22e">Get</span>(<span style="color:#e6db74">&#34;game-data&#34;</span>, <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">GetOptions</span>{}); <span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">IsNotFound</span>(<span style="color:#a6e22e">err</span>) {
+  <span style="color:#a6e22e">cm</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">clientset</span>.<span style="color:#a6e22e">CoreV1</span>().<span style="color:#a6e22e">ConfigMaps</span>(<span style="color:#e6db74">&#34;game&#34;</span>).<span style="color:#a6e22e">Create</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">configMap</span>)
+} <span style="color:#66d9ef">else</span> {
+  <span style="color:#a6e22e">cm</span>, <span style="color:#a6e22e">_</span> = <span style="color:#a6e22e">clientset</span>.<span style="color:#a6e22e">CoreV1</span>().<span style="color:#a6e22e">ConfigMaps</span>(<span style="color:#e6db74">&#34;game&#34;</span>).<span style="color:#a6e22e">Update</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">configMap</span>)
+}
+</code></pre></div><p><em>Do not ignore the errors, I did it just to simplify the code.</em></p>
+<p>This code gets the same results as creating or applying with <code>kubectl</code> the following ConfigMap file:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#66d9ef">apiVersion</span>: v1
+<span style="color:#66d9ef">kind</span>: ConfigMap
+<span style="color:#66d9ef">metadata</span>:
+  <span style="color:#66d9ef">name</span>: game-data
+  <span style="color:#66d9ef">namespace</span>: game
+<span style="color:#66d9ef">data</span>:
+  <span style="color:#66d9ef">ui.properties</span>: <span style="color:#e6db74">|
+</span><span style="color:#e6db74">   </span><span style="color:#e6db74"> </span><span style="color:#e6db74">color.good=purple</span>
+    color.bad=yellow
+    allow.textmode=<span style="color:#66d9ef">true</span>
+</code></pre></div><p>If these were the requirements then problem solved. To create/update known resources you just need to:</p>
+<ol>
+<li>Create the <code>config</code> from the kubeconfig file</li>
+<li>Create the <code>clientset</code> from the <code>config</code></li>
+<li>Create the resource(s) (<code>configMap</code>) using the appropriate API structure (<code>core/v1</code> and <code>meta/v1</code>)</li>
+<li>Identify if the resource exists using <code>Get()</code> and the right resource method. If it exist, use <code>Create()</code>, otherwise use <code>Update()</code></li>
+</ol>
+<p>Simple, right? :slightly_smiling_face:</p>
+<p>Unfortunately, the requirements changed (weird, they never change, right?); the resources are unknown in advance and are provided to the client by a file, a Go template or a HTTP URL.</p>
+<p>So, goodbye to the clientset and the awesome data structures from <code>k8s.io/api</code> (we&rsquo;ll see you later tho) and welcome to the vast collection of Kubernetes data structures and methods.</p>
+<p>By the time I&rsquo;m writing this post there is no much documentation about how to do this, so I had to dug into the deep code of Kubernetes and other tools to get &hellip;</p>
+<h2 id="a-kubernetes-client-to-apply-resources-of-any-type">A Kubernetes client to apply resources of any type</h2>
+<p>In case you are in hurry and just want to read code, no problema, go to the GitHub repository <code>johandry/kube-client</code>.</p>
+<p><!-- raw HTML omitted -->Important<!-- raw HTML omitted -->, I&rsquo;m ignoring most of the errors in the code, <strong><!-- raw HTML omitted -->don&rsquo;t do that<!-- raw HTML omitted --></strong>, I just doing it to simplify the code. Refer to the code in the repository to get the entire code and error handling.</p>
+<p>The plan to get this done is almost similar to the steps above, so let&rsquo;s get started with the step #1:</p>
+<h3 id="1-create-the-factory">(1) Create the Factory</h3>
+<p>Let&rsquo;s encapsulate all the configuration data such as the kubeconfig path and context into a configuration struct.</p>
+<p>Checking the code of <code>kubectl</code> and the <code>apply</code> command, they use a <code>Factory</code> interface and structure to provide the REST Configuration, a REST Mapper, a Discovery and REST Client, and a Builder among other things. The good news is, all these methods and what they provide can be obtained from the configuration struct and as it will create all these objects for us, let&rsquo;s rename it to <code>Factory</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">factory</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">KubeConfig</span>    <span style="color:#66d9ef">string</span>
+  <span style="color:#a6e22e">Context</span>       <span style="color:#66d9ef">string</span>
+}
+</code></pre></div><p>The first and the foundation for all the other methods is the <code>ClientConfig</code>, to create it we will need (1) the path to the kubeconfig file and the context, but this is not the only way, (2) the program may be running in a cluster so it&rsquo;s created from the cluster factory, (3) the kubeconfig path may be in the <code>KUBECONFIG</code> environment variable or (4) we can use the default kubeconfig from <code>~/.kube/config</code>. So, to get the configuration from any of these ways or sources, in that particular order, we will use loading rules and the default values:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">factory</span>) <span style="color:#a6e22e">ToRawKubeConfigLoader</span>() <span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">ClientConfig</span> {
+  <span style="color:#a6e22e">loadingRules</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">NewDefaultClientConfigLoadingRules</span>()
+  <span style="color:#a6e22e">loadingRules</span>.<span style="color:#a6e22e">DefaultClientConfig</span> = <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">DefaultClientConfig</span>
+  <span style="color:#a6e22e">loadingRules</span>.<span style="color:#a6e22e">ExplicitPath</span> = <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">KubeConfig</span>
+  <span style="color:#a6e22e">configOverrides</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">ConfigOverrides</span>{
+    <span style="color:#a6e22e">ClusterDefaults</span>: <span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">ClusterDefaults</span>,
+    <span style="color:#a6e22e">CurrentContext</span>:  <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">Context</span>,
+  }
+
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">clientcmd</span>.<span style="color:#a6e22e">NewNonInteractiveDeferredLoadingClientConfig</span>(<span style="color:#a6e22e">loadingRules</span>, <span style="color:#a6e22e">configOverrides</span>)
+}
+</code></pre></div><p>From this <code>ClientConfig</code> we can generate the REST Config, the same config from the initial version that was used to create the Clientset:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">factory</span>) <span style="color:#a6e22e">ToRESTConfig</span>() (<span style="color:#f92672">*</span><span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">Config</span>, <span style="color:#66d9ef">error</span>) {
+  <span style="color:#a6e22e">config</span>, <span style="color:#a6e22e">_</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">ToRawKubeConfigLoader</span>().<span style="color:#a6e22e">ClientConfig</span>()
+  <span style="color:#a6e22e">rest</span>.<span style="color:#a6e22e">SetKubernetesDefaults</span>(<span style="color:#a6e22e">config</span>)
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">config</span>, <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>By implementing these two methods and the methods <code>ToDiscoveryClient()</code> and <code>ToRESTMapper()</code> (check the code in the repository) we ensure <code>factory</code> implements the interface <code>genericclioptions.RESTClientGetter</code>. Most of the methods we use require the <code>RESTClientGetter</code> interface directly or indirectly.</p>
+<p>One of the most important methods in Config is  <code>NewBuilder()</code>, which returns a <code>resource.Builder</code> that is used to read unstructured resources from different sources (filename, URL, io.Reader or <code>[]byte</code>).  The input may contain more than one resource in a file.</p>
+<p>We get a Builder with the method <code>resource.NewBuilder()</code> and it requires a <code>RESTClientGetter</code>. Do you see now why it&rsquo;s important to implement this interface.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">f</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">factory</span>) <span style="color:#a6e22e">NewBuilder</span>() <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Builder</span> {
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">NewBuilder</span>(<span style="color:#a6e22e">f</span>)
+}
+</code></pre></div><p>The <code>Factory</code> interface is also a <code>RESTClientGetter</code> interface and some of the <code>Factory</code> methods are required by the client. These methods are: <code>DynamicClient()</code>, <code>KubernetesClientSet()</code>, <code>RESTClient()</code>, <code>NewBuilder()</code>, <code>ClientForMapping()</code> and others. Check the code in the repository to know how they look like.</p>
+<h3 id="2-create-the-client">(2) Create the Client</h3>
+<p>The Client has the Factory and it implements the interface <code>RESTClientGetter</code> and the <code>Factory</code> interface. So, the Client has all we need to have a good Kubernetes client.</p>
+<p>The client also store some important information used along the way such as the namespace, and the Kubernetes Clientset (the one we create in the initial version).</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Client</span> <span style="color:#66d9ef">struct</span> {
+  <span style="color:#a6e22e">Clientset</span>        <span style="color:#f92672">*</span><span style="color:#a6e22e">kubernetes</span>.<span style="color:#a6e22e">Clientset</span>
+  <span style="color:#a6e22e">factory</span>          <span style="color:#f92672">*</span><span style="color:#a6e22e">factory</span>
+  <span style="color:#a6e22e">namespace</span>        <span style="color:#66d9ef">string</span>
+  <span style="color:#a6e22e">enforceNamespace</span> <span style="color:#66d9ef">bool</span>
+}
+</code></pre></div><p>In the client we have some helpers to return the <code>Result</code> from the <code>Builder</code>. Basically to get the Result we need a chain of methods like the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">result</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">factory</span>.
+  <span style="color:#a6e22e">NewBuilder</span>().
+  <span style="color:#a6e22e">Unstructured</span>().                                       <span style="color:#75715e">// Only if required
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">Schema</span>(<span style="color:#a6e22e">validation</span>.<span style="color:#a6e22e">NullSchema</span>{}).                      <span style="color:#75715e">// Do not validate the code
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">ContinueOnError</span>().
+  <span style="color:#a6e22e">NamespaceParam</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">namespace</span>).
+  <span style="color:#a6e22e">DefaultNamespace</span>().
+  <span style="color:#a6e22e">FilenameParam</span>(<span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">enforceNamespace</span>, <span style="color:#a6e22e">filenameOptions</span>).  <span style="color:#75715e">// If the input are files or URLs
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">Stream</span>(<span style="color:#a6e22e">r</span>, <span style="color:#e6db74">&#34;&#34;</span>).                                       <span style="color:#75715e">// If the input is a io.Reader
+</span><span style="color:#75715e"></span>  <span style="color:#a6e22e">Flatten</span>().
+  <span style="color:#a6e22e">Do</span>()
+</code></pre></div><p>As the methods <code>Unstructured()</code>, <code>FilenameParam()</code> and <code>Stream()</code> are not always in the chain and depend of the needs, we have the following helpers: <code>ResultForFilenameParam()</code> and <code>ResultForReader()</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>) <span style="color:#a6e22e">ResultForReader</span>(<span style="color:#a6e22e">r</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Reader</span>, <span style="color:#a6e22e">unstructured</span> <span style="color:#66d9ef">bool</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Result</span> {
+  <span style="color:#a6e22e">b</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">factory</span>.<span style="color:#a6e22e">NewBuilder</span>()
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">opt</span>.<span style="color:#a6e22e">Unstructured</span> {
+    <span style="color:#a6e22e">b</span> = <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">Unstructured</span>()
+  }
+
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">b</span>.
+    <span style="color:#a6e22e">Stream</span>(<span style="color:#a6e22e">r</span>, <span style="color:#e6db74">&#34;&#34;</span>).
+    <span style="color:#a6e22e">Flatten</span>().
+    <span style="color:#a6e22e">Do</span>()
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>) <span style="color:#a6e22e">ResultForFilenameParam</span>(<span style="color:#a6e22e">filenames</span> []<span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">unstructured</span> <span style="color:#66d9ef">bool</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Result</span> {
+  <span style="color:#a6e22e">filenameOptions</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">FilenameOptions</span>{
+    <span style="color:#a6e22e">Recursive</span>: <span style="color:#66d9ef">false</span>,
+    <span style="color:#a6e22e">Filenames</span>: <span style="color:#a6e22e">filenames</span>,
+  }
+  
+  <span style="color:#a6e22e">b</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">factory</span>.<span style="color:#a6e22e">NewBuilder</span>()
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">unstructured</span> {
+    <span style="color:#a6e22e">b</span> = <span style="color:#a6e22e">b</span>.<span style="color:#a6e22e">Unstructured</span>()
+  }
+
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">b</span>.
+    <span style="color:#a6e22e">FilenameParam</span>(<span style="color:#a6e22e">f</span>.<span style="color:#a6e22e">enforceNamespace</span>, <span style="color:#a6e22e">filenameOptions</span>).
+    <span style="color:#a6e22e">Flatten</span>().
+    <span style="color:#a6e22e">Do</span>()
+}
+</code></pre></div><h3 id="3-create-update-or-delete-known-resources-using-the-api-data-structures">(3) Create, Update or Delete known resources using the API data structures</h3>
+<p>Not all the resources we are going to create are of unknown type, for example the Namespaces, so with the following code we accomplish that:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewClientE</span>(<span style="color:#a6e22e">context</span>, <span style="color:#a6e22e">kubeconfig</span> <span style="color:#66d9ef">string</span>) (<span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>, <span style="color:#66d9ef">error</span>) {
+  <span style="color:#a6e22e">factory</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">newFactory</span>(<span style="color:#a6e22e">context</span>, <span style="color:#a6e22e">kubeconfig</span>)
+  <span style="color:#f92672">...</span>
+  <span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">Clientset</span> = <span style="color:#a6e22e">factory</span>.<span style="color:#a6e22e">KubernetesClientSet</span>()
+  <span style="color:#f92672">...</span>
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">client</span>, <span style="color:#66d9ef">nil</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>) <span style="color:#a6e22e">CreateNamespace</span>(<span style="color:#a6e22e">namespace</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">error</span> {
+  <span style="color:#a6e22e">ns</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">v1</span>.<span style="color:#a6e22e">Namespace</span>{
+    <span style="color:#a6e22e">ObjectMeta</span>: <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">ObjectMeta</span>{
+      <span style="color:#a6e22e">Name</span>: <span style="color:#a6e22e">namespace</span>,
+      <span style="color:#a6e22e">Labels</span>: <span style="color:#66d9ef">map</span>[<span style="color:#66d9ef">string</span>]<span style="color:#66d9ef">string</span>{
+        <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#a6e22e">namespace</span>,
+      },
+    },
+  }
+  <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Clientset</span>.<span style="color:#a6e22e">CoreV1</span>().<span style="color:#a6e22e">Namespaces</span>().<span style="color:#a6e22e">Create</span>(<span style="color:#a6e22e">ns</span>)
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+}
+
+<span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>) <span style="color:#a6e22e">DeleteNamespace</span>(<span style="color:#a6e22e">namespace</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">error</span> {
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">Clientset</span>.<span style="color:#a6e22e">CoreV1</span>().<span style="color:#a6e22e">Namespaces</span>().<span style="color:#a6e22e">Delete</span>(<span style="color:#a6e22e">namespace</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">DeleteOptions</span>{})
+}
+</code></pre></div><h3 id="4-create-or-update-the-resources-of-unknown-type">(4) Create or Update the resources of unknown type</h3>
+<p>And finally, to create the resources or update the existing ones, we have the <code>Apply()</code> method.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">c</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Client</span>) <span style="color:#a6e22e">Apply</span>(<span style="color:#a6e22e">content</span> []<span style="color:#66d9ef">byte</span>) <span style="color:#66d9ef">error</span> {
+  <span style="color:#a6e22e">r</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">ResultForContent</span>(<span style="color:#a6e22e">content</span>, <span style="color:#66d9ef">true</span>)
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">Visit</span>(<span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">info</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Info</span>, <span style="color:#a6e22e">err</span> <span style="color:#66d9ef">error</span>) <span style="color:#66d9ef">error</span> {
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+    }
+    <span style="color:#a6e22e">current</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">NewHelper</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Client</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Mapping</span>).<span style="color:#a6e22e">Get</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Name</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Export</span>)
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      <span style="color:#66d9ef">if</span> !<span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">IsNotFound</span>(<span style="color:#a6e22e">err</span>) {
+        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+      }
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">create</span>(<span style="color:#a6e22e">info</span>, <span style="color:#66d9ef">nil</span>)
+    }
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">patch</span>(<span style="color:#a6e22e">info</span>, <span style="color:#a6e22e">current</span>)
+  })
+}
+</code></pre></div><p>After getting the <code>Result</code> from the Builder which takes the content of the resource (either from a file or Go template). The Result has the method <code>Visit()</code> with a function as unique parameter to walk through all the resources identified, each identified resource is in the variable <code>info</code> of <code>resource.Info</code> type.</p>
+<p>The function checks if the resource exists with the method <code>Get()</code> from the helper, there may be different kind of errors but the one we care about is <code>errors.IsNotFound(err)</code>. If the error is because the resource is not found, then create it. Otherwise, if there was no error at all, patch it.</p>
+<p>To create the resource we get assistance from the helper method from <code>resource</code> to create the HTTP request and get the final resource object which is used to update the resource in the <code>info</code> variable.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">create</span>(<span style="color:#a6e22e">info</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Info</span>) <span style="color:#66d9ef">error</span> {
+  <span style="color:#a6e22e">options</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">CreateOptions</span>{}
+  <span style="color:#a6e22e">obj</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">NewHelper</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Client</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Mapping</span>).<span style="color:#a6e22e">Create</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#66d9ef">true</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Object</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">options</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;creating %s. %s&#34;</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">String</span>(), <span style="color:#a6e22e">err</span>)
+  }
+  <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Refresh</span>(<span style="color:#a6e22e">obj</span>, <span style="color:#66d9ef">true</span>)
+  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>The patching is more complicated. The patching is done with the <code>Patch</code> method of the resource helper, it requires a patch which is a slices of bytes <code>[]byte</code>.  To get this patch we use <code>strategicpatch.CreateThreeWayMergePatch()</code> passing the current object in the cluster, the new object required by the user and the last applied version of such object obtained from the object annotations, all of them in JSON. This patching method is called (as the func name states) <a href="https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge">3-way-merge patch</a> and requires the patch type <code>types.StrategicMergePatchType</code>. To view this code, check the <code>patch.go</code> file from the repository.</p>
+<p>Since Kubernetes 1.16 the <a href="https://en.wikipedia.org/wiki/Merge_(version_control)#Three-way_merge">Service Side Patch</a> feature is in beta and if your cluster supports it, you basically needs the new object required by the user ni JSON and use the patch type <code>types.ApplyPatchType</code>. Then call the same <code>Patch</code> method of the resource helper.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">serverSideApply</span>(<span style="color:#a6e22e">info</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Info</span>, <span style="color:#a6e22e">err</span> <span style="color:#66d9ef">error</span>) <span style="color:#66d9ef">error</span> {
+  <span style="color:#a6e22e">data</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">Encode</span>(<span style="color:#a6e22e">unstructured</span>.<span style="color:#a6e22e">UnstructuredJSONScheme</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Object</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+  }
+  <span style="color:#a6e22e">options</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">PatchOptions</span>{
+    <span style="color:#a6e22e">Force</span>:        <span style="color:#66d9ef">true</span>,
+  }
+  <span style="color:#a6e22e">obj</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">NewHelper</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Client</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Mapping</span>).<span style="color:#a6e22e">Patch</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Name</span>, <span style="color:#a6e22e">types</span>.<span style="color:#a6e22e">ApplyPatchType</span>, <span style="color:#a6e22e">data</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">options</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+  }
+  <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Refresh</span>(<span style="color:#a6e22e">obj</span>, <span style="color:#66d9ef">true</span>)
+  <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+}
+</code></pre></div><p>Another patching method is <code>types.MergePatchType</code> which creates a 3-way-merge patch based on JSON merge patching. This one is used when the new object is not registered in the schema.</p>
+<p>If any of these patches fails the last option is to delete the current object and create the new one. This may not be a good idea, so let the decision to the user/developer to do this by forcing the patching.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">...</span>
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> <span style="color:#f92672">&amp;&amp;</span> (<span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">IsConflict</span>(<span style="color:#a6e22e">err</span>) <span style="color:#f92672">||</span> <span style="color:#a6e22e">errors</span>.<span style="color:#a6e22e">IsInvalid</span>(<span style="color:#a6e22e">err</span>)) <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">force</span> {
+    <span style="color:#a6e22e">patchBytes</span>, <span style="color:#a6e22e">patchObject</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">deleteAndCreate</span>(<span style="color:#a6e22e">info</span>, <span style="color:#a6e22e">patchBytes</span>)
+  }
+<span style="color:#f92672">...</span>
+</code></pre></div><p>To delete the object select the <code>DeletePropagationForeground</code> policy to delete the objects in cascade. If the creation of the object fails, restore the previous object.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">deleteAndCreate</span>(<span style="color:#a6e22e">info</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">Info</span>, <span style="color:#a6e22e">modified</span> []<span style="color:#66d9ef">byte</span>) ([]<span style="color:#66d9ef">byte</span>, <span style="color:#a6e22e">runtime</span>.<span style="color:#a6e22e">Object</span>, <span style="color:#66d9ef">error</span>) {
+  <span style="color:#a6e22e">helper</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">resource</span>.<span style="color:#a6e22e">NewHelper</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Client</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Mapping</span>)
+  
+  <span style="color:#a6e22e">policy</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">DeletePropagationForeground</span>
+  <span style="color:#a6e22e">delOptions</span> <span style="color:#f92672">:=</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">DeleteOptions</span>{
+    <span style="color:#a6e22e">PropagationPolicy</span>: <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">policy</span>
+  }
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">helper</span>.<span style="color:#a6e22e">DeleteWithOptions</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Name</span>, <span style="color:#a6e22e">delOptions</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>, <span style="color:#66d9ef">nil</span>, <span style="color:#a6e22e">err</span>
+  }
+
+  <span style="color:#f92672">...</span>
+
+  <span style="color:#a6e22e">options</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">metav1</span>.<span style="color:#a6e22e">CreateOptions</span>{}
+  <span style="color:#a6e22e">createdObject</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">helper</span>.<span style="color:#a6e22e">Create</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#66d9ef">true</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Object</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">options</span>)
+  <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+    <span style="color:#a6e22e">recreated</span>, <span style="color:#a6e22e">recreateErr</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">helper</span>.<span style="color:#a6e22e">Create</span>(<span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Namespace</span>, <span style="color:#66d9ef">true</span>, <span style="color:#a6e22e">info</span>.<span style="color:#a6e22e">Object</span>, <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">options</span>)
+    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">recreateErr</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+      <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;An error occurred force-replacing the existing object with the newly provided one. %v.\n\nAdditionally, an error occurred attempting to restore the original object: %v&#34;</span>, <span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">recreateErr</span>)
+    } <span style="color:#66d9ef">else</span> {
+      <span style="color:#a6e22e">createdObject</span> = <span style="color:#a6e22e">recreated</span>
+    }
+  }
+  <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">modified</span>, <span style="color:#a6e22e">createdObject</span>, <span style="color:#a6e22e">err</span>
+}
+
+</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<p>The <code>kubectl</code> CLI is great to control your Kubernetes cluster but not everything can be done with <code>kubectl</code> if you are developing in Go or other language.</p>
+<p>The  Kubernetes API is a very well designed and implemented API but still complex for some actions. It is getting simpler and simpler over time. Anytime soon we wouldn&rsquo;t need any kind of module to interact with them. Meanwhile, if you don&rsquo;t want to use the oficial Go packages from Kubernetes, feel free to use the <a href="https://github.com/johandry/klient">klient</a> Go package or the Helm (<code>helm.sh/helm/v3/pkg/kube</code>) Go package.</p>
+<p>The <a href="https://github.com/johandry/klient">klient</a> Go package is in use on production and will have more features to make it more appealing and useful to Go and Kubernetes application developers. If you&rsquo;d like to contribute to it, please, open an issue or create a Pull Request. I&rsquo;ll appreciate your contribution.</p>
+
+
+  
+<div class="prev-next-post pure-g">
+  <div class="pure-u-1-24" style="text-align: left;">
+    
+    <a href="http://blog.johandry.com/post/free-kubernetes-clusters-for-development-and-learning/"><i class="fa fa-chevron-left"></i></a>
+    
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="prev">
+      <a href="http://blog.johandry.com/post/free-kubernetes-clusters-for-development-and-learning/">Free Kubernetes Clusters for Development and Learning</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-2-24">
+    &nbsp;
+  </div>
+  <div class="pure-u-10-24">
+    
+  </div>
+  <div class="pure-u-1-24" style="text-align: right;">
+    
+  </div>
+</div>
+
+
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'johandry';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+</div>
+</div>
+<script src="http://blog.johandry.com/js/ui.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-51046735-3', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+</body>
+</html>
+

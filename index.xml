@@ -7,10 +7,21 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2017. All rights reserved.</copyright>
-    <lastBuildDate>Sun, 26 Jan 2020 12:55:31 -0800</lastBuildDate>
+    <lastBuildDate>Sun, 15 Mar 2020 11:56:02 -0800</lastBuildDate>
     
 	<atom:link href="http://blog.johandry.com/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Building a Kubernetes Client in Go</title>
+      <link>http://blog.johandry.com/post/build-k8s-client/</link>
+      <pubDate>Sun, 15 Mar 2020 11:56:02 -0800</pubDate>
+      
+      <guid>http://blog.johandry.com/post/build-k8s-client/</guid>
+      <description>Building a Kubernetes Client in Go defer Conclusion()
+Now I have the task to build a Kubernetes client in Go. The requirements are something like this: having an existing Kubernetes cluster it&amp;rsquo;s required a program to create or replace resources such as ConfigMaps, Secrets, Services and Deployments.
+If you know the resources to create, for example a ConfigMap, it&amp;rsquo;s not a big deal, just use the Kubernetes clientset (kubernetes.Clientset) from github.</description>
+    </item>
     
     <item>
       <title>Free Kubernetes Clusters for Development and Learning</title>
